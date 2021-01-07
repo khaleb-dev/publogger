@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * Local Configuration Override for DEVELOPMENT MODE.
+ *
+ * This configuration override file is for providing configuration to use while
+ * in development mode. Run:
+ *
+ * <code>
+ * $ composer development-enable
+ * </code>
+ *
+ * from the project root to copy this file to development.local.php and enable
+ * the settings it contains.
+ *
+ * You may also create files matching the glob pattern `{,*.}{global,local}-development.php`.
+ */
+
+return [
+    'view_manager' => [
+        'display_exceptions' => true,
+    ],
+    'doctrine' => [
+        'connection' => [
+            'orm_default' => [
+                'driverClass' => \Doctrine\DBAL\Driver\PDOMySql\Driver::class,
+                'params' => [
+                    'host'     => 'localhost',
+                    'user'     => 'root',
+                    'password' => '',
+                    'dbname'   => '',
+                    'port'     => '3306',
+                ],
+            ],
+        ],
+        'configuration' => [
+            'orm_default' => [
+                'numeric_functions' => [
+                    'HOUR' => 'DoctrineExtensions\Query\Mysql\Hour',
+                    'DAY' => 'DoctrineExtensions\Query\Mysql\Day',
+                    'MONTH' => 'DoctrineExtensions\Query\Mysql\Month',
+                    'YEAR' => 'DoctrineExtensions\Query\Mysql\Year',
+                    'DATE' => 'DoctrineExtensions\Query\Mysql\Date',
+                    'IF' => 'DoctrineExtensions\Query\Mysql\IfElse',
+                    'IF_NULL' => 'DoctrineExtensions\Query\Mysql\IfNull',
+                    'DATE_FORMAT' => 'DoctrineExtensions\Query\Mysql\DateFormat',
+                    'REGEXP' => 'DoctrineExtensions\Query\Mysql\Regexp',
+                    'WEEK' => 'DoctrineExtensions\Query\Mysql\Week'
+                ],
+                // Generate proxies automatically (turn off for production)
+                'generate_proxies'  => false,
+            ]
+        ]
+    ],
+    'ozioma' => [
+        'third-party' => [
+            'access-key' => 'Your Access key',
+        ],
+    ],
+];

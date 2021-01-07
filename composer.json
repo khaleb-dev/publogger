@@ -1,0 +1,67 @@
+{
+    "name": "khaleb/publogger",
+    "description": "An API based micro-service for blogging",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "blog",
+        "cms",
+        "publisher",
+        "api",
+        "micro-service"
+    ],
+    "require": {
+        "php": "^5.6 || ^7.3",
+        "laminas/laminas-component-installer": "^1.0 || ^2.1",
+        "laminas/laminas-development-mode": "^3.2",
+        "laminas/laminas-mvc": "^3.1.1",
+        "laminas/laminas-cache": "^2.9.0",
+        "laminas/laminas-mvc-form": "^1.0",
+        "laminas/laminas-json": "^3.1.2",
+        "laminas/laminas-log": "^2.11",
+        "laminas/laminas-mvc-console": "^1.2.0",
+        "laminas/laminas-mvc-plugins": "^1.0.1",
+        "laminas/laminas-psr7bridge": "^1.2.0",
+        "laminas/laminas-session": "^2.9.1",
+        "laminas/laminas-di": "^2.6",
+        "laminas/laminas-servicemanager-di": "^1.2.1",
+        "laminas/laminas-math": "^3.0",
+        "laminas/laminas-crypt": "^3.2",
+        "laminas/laminas-serializer": "^2.9",
+        "laminas/laminas-permissions-rbac": "^2.6",
+        "laminas/laminas-dependency-plugin": "^1.0 || ^2.0",
+        "laminas/laminas-paginator": "^2.8",
+        "zfr/zfr-cors": "1.*",
+        "doctrine/doctrine-orm-module": "^2.1",
+        "beberlei/doctrineextensions": "^1.2",
+        "guzzlehttp/guzzle": "^6.5",
+        "chibex/ozioma-laminas": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "module/Application/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ApplicationTest\\": "module/Application/test/"
+        }
+    },
+    "scripts": {
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "development-disable": "laminas-development-mode disable",
+        "development-enable": "laminas-development-mode enable",
+        "development-status": "laminas-development-mode status",
+        "post-create-project-cmd": [
+            "@development-enable",
+            "php bin/update-gitignore.php"
+        ],
+        "serve": "php -S 0.0.0.0:8080 -t public",
+        "test": "phpunit"
+    },
+    "require-dev": {
+        "laminas/laminas-developer-tools": "^2.0.1",
+        "laminas/laminas-test": "^3.3.0"
+    }
+}
