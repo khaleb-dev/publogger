@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS `publogger`;
+DROP DATABASE `publogger`;
 
 CREATE DATABASE `publogger`;
 
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 	PRIMARY KEY (`id`)
 )ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS `group` (
+CREATE TABLE IF NOT EXISTS `post_group` (
     `id` INT(2) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `description` VARCHAR(200) NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `post` (
 	`updated_on` DATETIME NOT NULL,
     PRIMARY KEY (`id`),
 	FOREIGN KEY (`user_id`) REFERENCES user(`id`),
-	FOREIGN KEY (`group_id`) REFERENCES group(`id`)
+	FOREIGN KEY (`group_id`) REFERENCES post_group(`id`)
 )ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `tags` (

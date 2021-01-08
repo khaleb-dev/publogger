@@ -14,7 +14,7 @@ return [
                     'host'     => 'localhost',
                     'user'     => 'root',
                     'password' => '',
-                    'dbname'   => '',
+                    'dbname'   => 'publogger',
                     'port'     => '3306',
                 ],
             ],
