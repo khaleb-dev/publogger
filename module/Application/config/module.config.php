@@ -23,7 +23,7 @@ return [
                 'options' => [
                     'route'    => '/',
                     'defaults' => [
-                        'controller' => Controller\WebsiteController::class,
+                        'controller' => Controller\IndexController::class,
                         'action'     => 'index',
                     ],
                 ],
@@ -31,8 +31,9 @@ return [
             'api' => [
                 'type' => Segment::class,
                 'options' => [
-                    'route'    => '/api[/:action[/:id]]',
+                    'route'    => '/:api-key[/:action[/:id]]',
                     'constraints' => [
+                        'api-key' => '[a-zA-Z][a-zA-Z0-9_-]*',
                         'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                         'id' => '[a-zA-Z0-9_-]*',
                     ],
