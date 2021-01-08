@@ -10,8 +10,15 @@ declare(strict_types=1);
 namespace Application\Service;
 
 use Application\CustomObject\Utility;
+use Application\Entity\Images;
+use Application\Entity\Post;
+use Application\Entity\PostGroup;
+use Application\Entity\PostImages;
+use Application\Entity\PostTags;
+use Application\Entity\Tags;
+use Application\Entity\User;
 
-class AppManager
+class BackendApiManager
 {
     private $entityManager;
     

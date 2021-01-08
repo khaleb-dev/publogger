@@ -31,14 +31,14 @@ return [
             'api' => [
                 'type' => Segment::class,
                 'options' => [
-                    'route'    => '/:api-key[/:action[/:id]]',
+                    'route'    => '/:action[/:id]',
                     'constraints' => [
                         'api-key' => '[a-zA-Z][a-zA-Z0-9_-]*',
                         'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                         'id' => '[a-zA-Z0-9_-]*',
                     ],
                     'defaults' => [
-                        'controller'    => Controller\ApiController::class,
+                        'controller'    => Controller\BackendApiController::class,
                         'action'        => 'index',
                     ],
                 ],
@@ -48,12 +48,12 @@ return [
     'controllers' => [
         'factories' => [
             Controller\IndexController::class => InvokableFactory::class,
-            Controller\ApiController::class => Controller\Factory\ApiControllerFactory::class,
+            Controller\BackendApiController::class => Controller\Factory\BackendApiControllerFactory::class,
         ],
     ],
     'service_manager' => [
         'factories' => [
-            Service\AppManager::class => Service\Factory\AppManagerFactory::class,
+            Service\BackendApiManager::class => Service\Factory\BackendApiManagerFactory::class,
         ],
     ],
     // The following registers our custom view 
