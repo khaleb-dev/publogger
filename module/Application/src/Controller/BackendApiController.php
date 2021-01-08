@@ -70,7 +70,13 @@ class BackendApiController extends AbstractActionController
             }
             else {
                 $response = $this->response(200, 'OK');
-                $response['tag'] = $tag;
+                $tagData = [];
+                $tagData['id'] = $tag->getId();
+                $tagData['name'] = $tag->getName();
+                $tagData['description'] = $tag->getDescription();
+                $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                $response['tag'] = $tagData;
             }
         }
         
