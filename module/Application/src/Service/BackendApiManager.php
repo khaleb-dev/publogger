@@ -27,5 +27,17 @@ class BackendApiManager
         $this->entityManager = $entityManager;
     }
 
+    public function createTag($data)
+    {
+        $tag = new Tags();
+        $now = new \DateTime;
+
+        $tag->setName($data['name']);
+        $tag->setDescription($data['description']);
+        $tag->setCreatedAt($now);
+        $this->entityManager->persist($tag);
+        $this->entityManager->flush();
+        return $tag;
+    }
 
 }

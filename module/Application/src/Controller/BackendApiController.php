@@ -23,15 +23,16 @@ use Application\Entity\PostImages;
 use Application\Entity\PostTags;
 use Application\Entity\Tags;
 use Application\Entity\User;
+use Application\Form\TagForm;
 
 class BackendApiController extends AbstractActionController
 {
-    private $appManager = null;
+    private $backendApiManager = null;
 
-    public function __construct($entityManager, $appManager)
+    public function __construct($entityManager, $backendApiManager)
     {
         $this->entityManager = $entityManager;
-        $this->appManager = $appManager;
+        $this->backendApiManager = $backendApiManager;
     }
 
     public function indexAction()
@@ -58,7 +59,29 @@ class BackendApiController extends AbstractActionController
 
         if ($this->getRequest()->isPost())
         {
-            $response = $this->response(201, 'CREATED');
+            $data = $this->params()->fromPost();
+            if (empty($data)) {
+                $response = $this->response(501, 'CREATED');
+            }
+            else {
+                $form = new TagForm();
+                $form->setData($data);
+                if ($form->isValid()) {
+                    $data = $form->getData();
+                    $tag = $this->backendApiManager->createTag($data);
+                    $tagData = [];
+                    $tagData['id'] = $tag->getId();
+                    $tagData['name'] = $tag->getName();
+                    $tagData['description'] = $tag->getDescription();
+                    $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                    $response = $this->response(201, 'CREATED');
+                    $response['tag'] = $tagData;
+                }
+                else {
+                    $response = $this->response(500, 'INTERNAL SERVER ERROR');
+                }
+            }
         }
         
         if ($this->getRequest()->isGet())
