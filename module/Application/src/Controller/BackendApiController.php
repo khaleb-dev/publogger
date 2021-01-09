@@ -178,6 +178,25 @@ class BackendApiController extends AbstractActionController
                 }
             }
         }
+        
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            $group = $this->entityManager->getRepository(PostGroup::class)->find($id);
+            if (empty($group)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $groupData = [];
+                $groupData['id'] = $group->getId();
+                $groupData['name'] = $group->getName();
+                $groupData['description'] = $group->getDescription();
+                $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
+
+                $response['group'] = $groupData;
+            }
+        }
 
         return new JsonModel($response);
     }
