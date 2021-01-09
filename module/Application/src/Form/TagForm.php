@@ -45,6 +45,15 @@ class TagForm extends Form
                 'label' => 'description',
             ],
         ]);
+
+        // Add "update" field
+        $this->add([
+            'type'  => 'text',
+            'name' => 'update',
+            'options' => [
+                'label' => 'update',
+            ],
+        ]);
     }
 
     private function addInputFilter() 
@@ -90,6 +99,24 @@ class TagForm extends Form
                 ],
             ],
         ]);
+        
+        // Filter "update" field
+        $inputFilter->add([
+            'name'     => 'update',
+            'required' => false,
+            'filters'  => [
+                ['name' => 'StringTrim'],
+                ['name' => 'StripTags'],
+                ['name' => 'StripNewlines'],
+            ],                
+            'validators' => [
+                [
+                    'name'    => 'StringLength',
+                    'options' => [
+                        'max' => 5
+                    ],
+                ],
+            ],
+        ]);
     }
-
 }

@@ -40,7 +40,7 @@ class BackendApiController extends AbstractActionController
         return new JsonModel([]);
     }
 
-    private function response(int $code = 404, string $status = 'NOT FOUND')
+    private function response(int $code = 406, string $status = 'NOT ACCEPTABLE')
     {
         $response = [
             'code' => $code,
@@ -71,18 +71,29 @@ class BackendApiController extends AbstractActionController
                 $form->setData($data);
                 if ($form->isValid()) {
                     $data = $form->getData();
-                    $tag = $this->backendApiManager->createTag($data);
+                    if (isset($data['update']) && $data['update'] === 'true') {
+                        $id = intval($this->params()->fromRoute('id', null));
+                        $tag = $this->entityManager->getRepository(Tags::class)->find($id);
+                        if (empty($tag)) {
+                            return new JsonModel($this->response(404, 'NOT FOUND'));
+                        }
+                        $tag = $this->backendApiManager->updateTag($tag, $data);
+                        $response = $this->response(200, 'OK');
+                    }
+                    else {
+                        $tag = $this->backendApiManager->createTag($data);
+                        $response = $this->response(201, 'CREATED');
+                    }
                     $tagData = [];
                     $tagData['id'] = $tag->getId();
                     $tagData['name'] = $tag->getName();
                     $tagData['description'] = $tag->getDescription();
                     $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
 
-                    $response = $this->response(201, 'CREATED');
                     $response['tag'] = $tagData;
                 }
                 else {
-                    $response = $this->response(500, 'INTERNAL SERVER ERROR');
+                    $response = $this->response(418, 'I AM A TEAPOT');
                 }
             }
         }
@@ -106,47 +117,6 @@ class BackendApiController extends AbstractActionController
             }
         }
         
-        if ($this->getRequest()->isPatch())
-        {
-            $id = intval($this->params()->fromRoute('id', null));
-            $tag = $this->entityManager->getRepository(Tags::class)->find($id);
-            if (empty($tag)) {
-                $response = $this->response(404, 'NOT FOUND');
-            }
-            else {
-                $data = $this->params()->fromPost();
-                if (empty($data)) {
-                    $response = $this->response(501, 'from patch');
-                }
-                else {
-                    echo "good";
-                    exit();
-                    $form = new TagForm();
-                    $form->setData($data);
-                    if ($form->isValid()) {
-                        $data = $form->getData();
-                        $tag = $this->backendApiManager->updateTag($tag, $data);
-                        $tagData = [];
-                        $tagData['id'] = $tag->getId();
-                        $tagData['name'] = $tag->getName();
-                        $tagData['description'] = $tag->getDescription();
-                        $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
-
-                        $response = $this->response(201, 'CREATED');
-                        $response['tag'] = $tagData;
-                    }
-                    else {
-                        $response = $this->response(500, 'INTERNAL SERVER ERROR');
-                    }
-                }
-            }
-        }
-        
-        if ($this->getRequest()->isPut())
-        {
-            $response = $this->response(200, 'OK');
-        }
-        
         if ($this->getRequest()->isDelete())
         {
             $id = intval($this->params()->fromRoute('id', null));
@@ -158,7 +128,6 @@ class BackendApiController extends AbstractActionController
                 $this->backendApiManager->deleteTag($tag);
                 $response = $this->response(200, 'OK');
             }
-            // $response = $this->response(501, 'NOT IMPLEMENTED');
         }
 
         return new JsonModel($response);
