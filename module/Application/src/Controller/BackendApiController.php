@@ -59,6 +59,9 @@ class BackendApiController extends AbstractActionController
 
         if ($this->getRequest()->isPost())
         {
+            // $auth = $this->params()->fromHeader('authorization');
+            // var_dump($auth);
+            // exit();
             $data = $this->params()->fromPost();
             if (empty($data)) {
                 $response = $this->response(501, 'CREATED');
@@ -105,8 +108,38 @@ class BackendApiController extends AbstractActionController
         
         if ($this->getRequest()->isPatch())
         {
-            $response = $this->response(200, 'OK');
-            $response['message'] = 'patch';
+            $id = intval($this->params()->fromRoute('id', null));
+            $tag = $this->entityManager->getRepository(Tags::class)->find($id);
+            if (empty($tag)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $data = $this->params()->fromPost();
+                if (empty($data)) {
+                    $response = $this->response(501, 'from patch');
+                }
+                else {
+                    echo "good";
+                    exit();
+                    $form = new TagForm();
+                    $form->setData($data);
+                    if ($form->isValid()) {
+                        $data = $form->getData();
+                        $tag = $this->backendApiManager->updateTag($tag, $data);
+                        $tagData = [];
+                        $tagData['id'] = $tag->getId();
+                        $tagData['name'] = $tag->getName();
+                        $tagData['description'] = $tag->getDescription();
+                        $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                        $response = $this->response(201, 'CREATED');
+                        $response['tag'] = $tagData;
+                    }
+                    else {
+                        $response = $this->response(500, 'INTERNAL SERVER ERROR');
+                    }
+                }
+            }
         }
         
         if ($this->getRequest()->isPut())
@@ -116,7 +149,16 @@ class BackendApiController extends AbstractActionController
         
         if ($this->getRequest()->isDelete())
         {
-            $response = $this->response(501, 'NOT IMPLEMENTED');
+            $id = intval($this->params()->fromRoute('id', null));
+            $tag = $this->entityManager->getRepository(Tags::class)->find($id);
+            if (empty($tag)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $this->backendApiManager->deleteTag($tag);
+                $response = $this->response(200, 'OK');
+            }
+            // $response = $this->response(501, 'NOT IMPLEMENTED');
         }
 
         return new JsonModel($response);

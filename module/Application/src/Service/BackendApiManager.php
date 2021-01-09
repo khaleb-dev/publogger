@@ -40,4 +40,19 @@ class BackendApiManager
         return $tag;
     }
 
+    public function updateTag($tag, $data)
+    {
+        $tag->setName($data['name']);
+        $tag->setDescription($data['description']);
+        $this->entityManager->flush();
+        return $tag;
+    }
+
+    public function deleteTag($tag)
+    {
+        $this->entityManager->remove($tag);
+        $this->entityManager->flush();
+        return true;
+    }
+
 }
