@@ -153,7 +153,13 @@ class BackendApiController extends AbstractActionController
                 if ($form->isValid()) {
                     $data = $form->getData();
                     if (isset($data['update']) && $data['update'] === 'true') {
-                        
+                        $id = intval($this->params()->fromRoute('id', null));
+                        $group = $this->entityManager->getRepository(PostGroup::class)->find($id);
+                        if (empty($group)) {
+                            return new JsonModel($this->response(404, 'NOT FOUND'));
+                        }
+                        $group = $this->backendApiManager->updateGroup($group, $data);
+                        $response = $this->response(200, 'OK');
                     }
                     else {
                         $group = $this->backendApiManager->createGroup($data);
