@@ -55,4 +55,32 @@ class BackendApiManager
         return true;
     }
 
+    public function createGroup($data)
+    {
+        $group = new PostGroup();
+        $now = new \DateTime;
+
+        $group->setName($data['name']);
+        $group->setDescription($data['description']);
+        $group->setCreatedAt($now);
+        $this->entityManager->persist($group);
+        $this->entityManager->flush();
+        return $group;
+    }
+
+    public function updateGroup($group, $data)
+    {
+        $group->setName($data['name']);
+        $group->setDescription($data['description']);
+        $this->entityManager->flush();
+        return $group;
+    }
+
+    public function deleteGroup($group)
+    {
+        $this->entityManager->remove($group);
+        $this->entityManager->flush();
+        return true;
+    }
+
 }

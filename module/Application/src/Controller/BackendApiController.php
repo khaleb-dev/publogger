@@ -24,6 +24,7 @@ use Application\Entity\PostTags;
 use Application\Entity\Tags;
 use Application\Entity\User;
 use Application\Form\TagForm;
+use Application\Form\GroupForm;
 
 class BackendApiController extends AbstractActionController
 {
@@ -51,7 +52,7 @@ class BackendApiController extends AbstractActionController
     }
 
     /**
-     * Action to handle a single tag
+     * Action to handle tag
      */
     public function tagAction()
     {
@@ -134,35 +135,48 @@ class BackendApiController extends AbstractActionController
     }
 
     /**
-     * Action to handle a single tag
+     * Action to handle group
      */
-    public function tagsAction()
+    public function groupAction()
     {
-        $response = ['code' => 404, 'status' => 'NOT FOUND'];
+        $response = $this->response();
 
         if ($this->getRequest()->isPost())
         {
-            $response = ['code' => 201, 'status' => 'CREATED', 'message' => 'post'];
-        }
-        
-        if ($this->getRequest()->isGet())
-        {
-            $response = ['code' => 200, 'status' => 'OK', 'message' => 'get'];
-        }
-        
-        if ($this->getRequest()->isPatch())
-        {
-            $response = ['code' => 200, 'status' => 'OK', 'message' => 'patch'];
-        }
-        
-        if ($this->getRequest()->isPut())
-        {
-            $response = ['code' => 200, 'status' => 'OK', 'message' => 'put'];
-        }
-        
-        if ($this->getRequest()->isDelete())
-        {
-            $response = ['code' => 200, 'status' => 'OK', 'message' => 'delete'];
+            $data = $this->params()->fromPost();
+            if (empty($data)) {
+                $response = $this->response(501, 'CREATED');
+            }
+            else {
+                $form = new GroupForm();
+                $form->setData($data);
+                if ($form->isValid()) {
+                    $data = $form->getData();
+                    if (isset($data['update']) && $data['update'] === 'true') {
+                        $id = intval($this->params()->fromRoute('id', null));
+                        $group = $this->entityManager->getRepository(PostGroup::class)->find($id);
+                        if (empty($group)) {
+                            return new JsonModel($this->response(404, 'NOT FOUND'));
+                        }
+                        $group = $this->backendApiManager->updateGroup($group, $data);
+                        $response = $this->response(200, 'OK');
+                    }
+                    else {
+                        $group = $this->backendApiManager->createGroup($data);
+                        $response = $this->response(201, 'CREATED');
+                    }
+                    $groupData = [];
+                    $groupData['id'] = $group->getId();
+                    $groupData['name'] = $group->getName();
+                    $groupData['description'] = $group->getDescription();
+                    $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
+
+                    $response['group'] = $groupData;
+                }
+                else {
+                    $response = $this->response(418, 'I AM A TEAPOT');
+                }
+            }
         }
 
         return new JsonModel($response);
