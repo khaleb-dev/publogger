@@ -248,4 +248,38 @@ class BackendApiController extends AbstractActionController
         return new JsonModel($response);
     }
 
+    /**
+     * Action to handle groups
+     */
+    public function groupsAction()
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            $groups = $this->entityManager->getRepository(PostGroup::class)->findAll();
+            if (empty($groups)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $groupsData = array();
+                foreach ($groups as $group) {
+                    $groupData = [];
+                    $groupData['id'] = $group->getId();
+                    $groupData['name'] = $group->getName();
+                    $groupData['description'] = $group->getDescription();
+                    $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
+
+                    array_push($groupsData, $groupData);
+                }
+
+                $response['groups'] = $groupsData;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
 }
