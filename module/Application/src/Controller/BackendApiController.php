@@ -153,13 +153,7 @@ class BackendApiController extends AbstractActionController
                 if ($form->isValid()) {
                     $data = $form->getData();
                     if (isset($data['update']) && $data['update'] === 'true') {
-                        $id = intval($this->params()->fromRoute('id', null));
-                        $group = $this->entityManager->getRepository(PostGroup::class)->find($id);
-                        if (empty($group)) {
-                            return new JsonModel($this->response(404, 'NOT FOUND'));
-                        }
-                        $group = $this->backendApiManager->updateGroup($group, $data);
-                        $response = $this->response(200, 'OK');
+                        
                     }
                     else {
                         $group = $this->backendApiManager->createGroup($data);
@@ -195,6 +189,19 @@ class BackendApiController extends AbstractActionController
                 $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
 
                 $response['group'] = $groupData;
+            }
+        }
+        
+        if ($this->getRequest()->isDelete())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            $group = $this->entityManager->getRepository(PostGroup::class)->find($id);
+            if (empty($group)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $this->backendApiManager->deleteGroup($group);
+                $response = $this->response(200, 'OK');
             }
         }
 
