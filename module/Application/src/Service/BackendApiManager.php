@@ -40,7 +40,7 @@ class BackendApiManager
         return $tag;
     }
 
-    public function updateTag($tag, $data)
+    public function updateTag(Tags $tag, $data)
     {
         $tag->setName($data['name']);
         $tag->setDescription($data['description']);
@@ -48,7 +48,7 @@ class BackendApiManager
         return $tag;
     }
 
-    public function deleteTag($tag)
+    public function deleteTag(Tags $tag)
     {
         $this->entityManager->remove($tag);
         $this->entityManager->flush();
@@ -68,7 +68,7 @@ class BackendApiManager
         return $group;
     }
 
-    public function updateGroup($group, $data)
+    public function updateGroup(PostGroup $group, $data)
     {
         $group->setName($data['name']);
         $group->setDescription($data['description']);
@@ -76,11 +76,23 @@ class BackendApiManager
         return $group;
     }
 
-    public function deleteGroup($group)
+    public function deleteGroup(PostGroup $group)
     {
         $this->entityManager->remove($group);
         $this->entityManager->flush();
         return true;
+    }
+
+    public function saveImage(string $filename)
+    {
+        $image = new Images();
+        $now = new \DateTime;
+
+        $image->setName($filename);
+        $image->setCreatedAt($now);
+        $this->entityManager->persist($image);
+        $this->entityManager->flush();
+        return $image;
     }
 
 }

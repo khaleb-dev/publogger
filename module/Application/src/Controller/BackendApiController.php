@@ -11,8 +11,8 @@ namespace Application\Controller;
 
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
-use Laminas\Http\Headers;
-use Laminas\Http\Response;
+// use Laminas\Http\Headers;
+// use Laminas\Http\Response;
 use Application\CustomObject\CustomFileUpload;
 use Application\CustomObject\Utility;
 use Application\CustomObject\simple_html_dom;
@@ -65,7 +65,7 @@ class BackendApiController extends AbstractActionController
             // exit();
             $data = $this->params()->fromPost();
             if (empty($data)) {
-                $response = $this->response(501, 'CREATED');
+                $response = $this->response();
             }
             else {
                 $form = new TagForm();
@@ -282,4 +282,55 @@ class BackendApiController extends AbstractActionController
         return new JsonModel($response);
     }
 
+    /**
+     * Action to handle image upload
+     * Make sure you create the follow
+     */
+    public function uploadImageAction()
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isPost())
+        {
+            $data = $this->params()->fromPost();
+
+            $request = $this->getRequest();
+            $data = array_merge_recursive(
+                $request->getPost()->toArray(), 
+                $request->getFiles()->toArray()
+            );
+            $acceptedParams = ['path' => './public/i1m2a3g4e5s/', 'exts' => ['jpeg', 'jpg', 'png', 'gif'], 'type' => '_imgFl'];
+
+            $upload = CustomFileUpload::upload($data, $acceptedParams);
+            if ($upload['code'] == 200) {
+                $saved = $this->backendApiManager->saveImage($upload['fileName']);
+                if ($saved) {
+                    $response = $this->response(201, 'CREATED');
+                }
+                else {
+                    $response = $this->response(409, 'CONFLICT');
+                    $response['message'] = "File uploaded BUT failed to save resource!";
+                }
+                // create an object to hold image response data
+                $imageData = [];
+                $imageData['id'] = $saved->getId();
+                $imageData['fileUrl'] = $upload['fileUrl'];
+                $imageData['fileName'] = $upload['fileName'];
+                $imageData['created_at'] = $saved->getCreatedAt()->format('Y-m-d H:i:s');
+                // add image data to json response
+                $response['imageData'] = $imageData;
+            }
+            else {
+                $response = $this->response(500, 'INTERNAL SERVER ERROR');
+                $response['message'] = $upload['message'];
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+    public function listImagesAction()
+    {
+        
+    }
 }

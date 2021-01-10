@@ -28,11 +28,11 @@ class CustomFileUpload
 		$fileExt = strtolower(pathinfo($file,PATHINFO_EXTENSION));
 
 		if(!in_array($fileExt, $acceptedParams['exts'])) {
-        	$errors['message'] = "You file is too large or extension not supported(.mp3 for audio or .mp4 for video.)";
+        	$errors['message'] = "We encountered an error while processing your request. It maybe that your file is too large, the file extension is not supported, or attempt to force upload for an empty file.";
     	}
 
     	if(empty($errors)) {
-			$fileNewName = "coc_".Utility::randomStrings(3).time().Utility::randomStrings(2).$acceptedParams['type'].".".$fileExt;
+			$fileNewName = Utility::randomStrings(8).time().Utility::randomStrings(4).$acceptedParams['type'].".".$fileExt;
 
 			if (move_uploaded_file($tmpDir, $acceptedParams['path'].$fileNewName)) {
 
@@ -61,7 +61,7 @@ class CustomFileUpload
 		} else {
 			$response['code'] = 407;
 			$response['status'] = 'error';
-			$response['message'] = $errors;
+			$response['message'] = $errors['message'];
 			$response['fileUrl'] = '';
 
 			return $response;
