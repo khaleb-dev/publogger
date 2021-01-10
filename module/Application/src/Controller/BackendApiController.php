@@ -326,11 +326,32 @@ class BackendApiController extends AbstractActionController
             }
         }
 
-        return new JsonModel($response);
-    }
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ // return all images
+                echo "nouulll";
+                exit();
+            }
+            else { // search image by id
+                $image = $this->entityManager->getRepository(Images::class)->find($id);
+                if (empty($image)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $response = $this->response(200, 'OK');
+                    $imageData = [];
+                    $imageData['id'] = $image->getId();
+                    // $imageData['fileUrl'] = $upload['fileUrl'];
+                    $imageData['fileName'] = $image->getName();
+                    $imageData['created_at'] = $image->getCreatedAt()->format('Y-m-d H:i:s');
+                    // add image data to json response
+                    $response['imageData'] = $imageData;
+                }
+            }
 
-    public function listImagesAction()
-    {
-        
+        }
+
+        return new JsonModel($response);
     }
 }
