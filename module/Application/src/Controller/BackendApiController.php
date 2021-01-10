@@ -264,7 +264,7 @@ class BackendApiController extends AbstractActionController
             }
             else {
                 $response = $this->response(200, 'OK');
-                $groupsData = array();
+                $groupsArr = array();
                 foreach ($groups as $group) {
                     $groupData = [];
                     $groupData['id'] = $group->getId();
@@ -272,10 +272,10 @@ class BackendApiController extends AbstractActionController
                     $groupData['description'] = $group->getDescription();
                     $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
 
-                    array_push($groupsData, $groupData);
+                    array_push($groupsArr, $groupData);
                 }
 
-                $response['groups'] = $groupsData;
+                $response['groups'] = $groupsArr;
             }
         }
 
@@ -330,8 +330,25 @@ class BackendApiController extends AbstractActionController
         {
             $id = intval($this->params()->fromRoute('id', null));
             if(is_null($id) || $id <= 0){ // return all images
-                echo "nouulll";
-                exit();
+                $images = $this->entityManager->getRepository(Images::class)->findAll();
+                if (empty($images)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $response = $this->response(200, 'OK');
+                    $imagesArr = array();
+                    foreach ($images as $image) {
+                        $imageData = [];
+                        $imageData['id'] = $image->getId();
+                        // $imageData['fileUrl'] = $upload['fileUrl'];
+                        $imageData['fileName'] = $image->getName();
+                        $imageData['created_at'] = $image->getCreatedAt()->format('Y-m-d H:i:s');
+
+                        array_push($imagesArr, $imageData);
+                    }
+                    // add image array to json response
+                    $response['imageData'] = $imagesArr;
+                }
             }
             else { // search image by id
                 $image = $this->entityManager->getRepository(Images::class)->find($id);
@@ -349,7 +366,6 @@ class BackendApiController extends AbstractActionController
                     $response['imageData'] = $imageData;
                 }
             }
-
         }
 
         return new JsonModel($response);
