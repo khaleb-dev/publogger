@@ -67,4 +67,19 @@ class CustomFileUpload
 			return $response;
 		}
 	}
+
+	public static function delete($path, $fileName)
+	{
+		if ($path !== '' && $fileName !== '') {
+			$file = $path.$fileName;
+			try {
+				unlink($file);
+
+				return true;
+			} 
+			catch (\Throwable $th) {
+				return $th;
+			}
+		}
+	}
 }

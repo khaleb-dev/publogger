@@ -95,4 +95,11 @@ class BackendApiManager
         return $image;
     }
 
+    public function deleteImage(Images $image)
+    {
+        $this->entityManager->remove($image);
+        $this->entityManager->flush();
+        return true;
+    }
+
 }

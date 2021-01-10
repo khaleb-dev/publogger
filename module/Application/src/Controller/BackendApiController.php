@@ -284,7 +284,7 @@ class BackendApiController extends AbstractActionController
 
     /**
      * Action to handle image upload
-     * Make sure you create the follow
+     * Make sure you create the 'i1m2a3g4e5s' folder inside public dir to store uploaded images
      */
     public function uploadImageAction()
     {
@@ -368,6 +368,21 @@ class BackendApiController extends AbstractActionController
             }
         }
 
+        if ($this->getRequest()->isDelete())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            $image = $this->entityManager->getRepository(Images::class)->find($id);
+            if (empty($image)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                CustomFileUpload::delete('./public/i1m2a3g4e5s/', $image->getName());
+                $this->backendApiManager->deleteImage($image);
+                $response = $this->response(200, 'OK');
+            }
+        }
+
         return new JsonModel($response);
     }
+    
 }
