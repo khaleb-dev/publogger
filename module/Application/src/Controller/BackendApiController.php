@@ -292,8 +292,6 @@ class BackendApiController extends AbstractActionController
         
         if ($this->getRequest()->isPost())
         {
-            $data = $this->params()->fromPost();
-
             $request = $this->getRequest();
             $data = array_merge_recursive(
                 $request->getPost()->toArray(), 
@@ -384,5 +382,82 @@ class BackendApiController extends AbstractActionController
 
         return new JsonModel($response);
     }
+
+    /**
+     * Action to handle create post
+     * This will create and publish a new post and return the post data
+     * It will also update an existing post if id was passed
+     * It will set the post status as "draft" or "publish" based on the status passed in the request payload.
+     * By default, the post status is "draft"
+     */
+    public function postAction()
+    {
+        $response = $this->response();
+
+        if ($this->getRequest()->isPost())
+        {
+            $data = $this->params()->fromPost();
+
+        }
+
+        return new JsonModel($response);
+    }
+
+    /**
+     * Action to handle draft posts
+     * For POST request: This will change the status of a post to "draft"
+     * For GET request: This will return all draft posts or single draft post as specified by id
+     */
+    public function draftAction()
+    {
+        $response = $this->response();
+
+        if ($this->getRequest()->isPost())
+        {
+            $data = $this->params()->fromPost();
+
+        }
+
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ // return all post
+                
+            }
+            else { // search post by id
+                $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => $id, "isPublished" => false, "isDeleted" => false]);
+                if (empty($post)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $response = $this->response(200, 'OK');
+                    $postData = [];
+                    $postData['id'] = $post->getId();
+                    $postData['slug'] = $post->getSlug();
+                    $postData['title'] = $post->getPostTitle();
+                    $postData['content'] = $post->getPostBody();
+                    $postData['thumbnail'] = $post->getThumbnailUrl();
+                    $postData['published'] = $post->getIsPublished();
+                    $postData['total_views'] = $post->getTotalViews();
+                    $postData['published'] = $post->getIsPublished();
+                    $postData['group'] = [];
+                    $postData['group']['id'] = $post->getGroup()->getId();
+                    $postData['group']['name'] = $post->getGroup()->getName();
+                    $postData['publisher'] = [];
+                    $postData['publisher']['id'] = $post->getUser()->getId();
+                    $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                    $postData['publisher']['username'] = $post->getUser()->getUsername();
+                    $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                    $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+                    // add post data to json response
+                    $response['postData'] = $postData;
+                }
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+
     
 }
