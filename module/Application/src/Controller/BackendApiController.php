@@ -421,8 +421,39 @@ class BackendApiController extends AbstractActionController
         if ($this->getRequest()->isGet())
         {
             $id = intval($this->params()->fromRoute('id', null));
-            if(is_null($id) || $id <= 0){ // return all post
-                
+            if(is_null($id) || $id <= 0){ // return all unpublished post
+                $posts = $this->entityManager->getRepository(Post::class)->findBy(["isPublished" => false, "isDeleted" => false]);
+                if (empty($posts)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $response = $this->response(200, 'OK');
+                    $postsArr = array();
+                    foreach ($posts as $post) {
+                        $postData = [];
+                        $postData['id'] = $post->getId();
+                        $postData['slug'] = $post->getSlug();
+                        $postData['title'] = $post->getPostTitle();
+                        $postData['content'] = $post->getPostBody();
+                        $postData['thumbnail'] = $post->getThumbnailUrl();
+                        $postData['published'] = $post->getIsPublished();
+                        $postData['total_views'] = $post->getTotalViews();
+                        $postData['published'] = $post->getIsPublished();
+                        $postData['group'] = [];
+                        $postData['group']['id'] = $post->getGroup()->getId();
+                        $postData['group']['name'] = $post->getGroup()->getName();
+                        $postData['publisher'] = [];
+                        $postData['publisher']['id'] = $post->getUser()->getId();
+                        $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                        $postData['publisher']['username'] = $post->getUser()->getUsername();
+                        $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                        $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+
+                        array_push($postsArr, $postData);
+                    }
+                    // add post array to json response
+                    $response['postData'] = $postsArr;
+                }
             }
             else { // search post by id
                 $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => $id, "isPublished" => false, "isDeleted" => false]);
