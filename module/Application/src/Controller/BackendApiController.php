@@ -25,6 +25,7 @@ use Application\Entity\Tags;
 use Application\Entity\User;
 use Application\Form\TagForm;
 use Application\Form\GroupForm;
+use Application\Form\PostForm;
 
 class BackendApiController extends AbstractActionController
 {
@@ -94,7 +95,7 @@ class BackendApiController extends AbstractActionController
                     $response['tag'] = $tagData;
                 }
                 else {
-                    $response = $this->response(418, 'I AM A TEAPOT');
+                    $response = $this->response(400, 'BAD REQUEST');
                 }
             }
         }
@@ -179,7 +180,7 @@ class BackendApiController extends AbstractActionController
         {
             $data = $this->params()->fromPost();
             if (empty($data)) {
-                $response = $this->response(501, 'CREATED');
+                $response = $this->response();
             }
             else {
                 $form = new GroupForm();
@@ -208,7 +209,7 @@ class BackendApiController extends AbstractActionController
                     $response['group'] = $groupData;
                 }
                 else {
-                    $response = $this->response(418, 'I AM A TEAPOT');
+                    $response = $this->response(400, 'BAD REQUEST');
                 }
             }
         }
@@ -397,7 +398,21 @@ class BackendApiController extends AbstractActionController
         if ($this->getRequest()->isPost())
         {
             $data = $this->params()->fromPost();
-
+            if (empty($data)) {
+                $response = $this->response();
+            }
+            else {
+                $form = new PostForm();
+                $form->setData($data);
+                if ($form->isValid()) {
+                    $data = $form->getData();
+                    var_dump($data);
+                    exit();
+                }
+                else {
+                    $response = $this->response(400, 'BAD REQUEST');
+                }
+            }
         }
 
         return new JsonModel($response);
@@ -405,7 +420,7 @@ class BackendApiController extends AbstractActionController
 
     /**
      * Action to handle draft posts
-     * For POST request: This will change the status of a post to "draft"
+     * For POST request: This will change the status of a post to "draft" and also update the post content if any was passed
      * For GET request: This will return all draft posts or single draft post as specified by id
      */
     public function draftAction()

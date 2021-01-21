@@ -86,4 +86,7 @@ CREATE TABLE IF NOT EXISTS `post_images`(
 	FOREIGN KEY (`image_id`) REFERENCES images(`id`)
 )ENGINE=InnoDB;
 
+INSERT INTO `post_group` (`name`, `description`, `created_at`) VALUES
+("no_group", "this is used when the post have no group.", NOW());
+
 COMMIT;
