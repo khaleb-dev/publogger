@@ -22,7 +22,7 @@ class BackendApiControllerFactory
     /**
      * This method creates the BackendApiController and returns its instance. 
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container)
     {
         $entityManager = $container->get('doctrine.entitymanager.orm_default');
         $backendApiManager = $container->get(BackendApiManager::class);

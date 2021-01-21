@@ -406,8 +406,15 @@ class BackendApiController extends AbstractActionController
                 $form->setData($data);
                 if ($form->isValid()) {
                     $data = $form->getData();
-                    var_dump($data);
-                    exit();
+                    if (isset($data['id'])) { // update the record
+                        $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($data['id']), "isDeleted" => false]);
+                        $createPost = $this->backendApiManager->updatePost($data);
+                        $response = $this->response(201, 'CREATED');
+                    }
+                    else { // create new record
+                        $createPost = $this->backendApiManager->createPost($data);
+                        $response = $this->response(201, 'CREATED');
+                    }
                 }
                 else {
                     $response = $this->response(400, 'BAD REQUEST');
@@ -420,7 +427,7 @@ class BackendApiController extends AbstractActionController
 
     /**
      * Action to handle draft posts
-     * For POST request: This will change the status of a post to "draft" and also update the post content if any was passed
+     * For POST request: This will change the status of a post to "draft"
      * For GET request: This will return all draft posts or single draft post as specified by id
      */
     public function draftAction()

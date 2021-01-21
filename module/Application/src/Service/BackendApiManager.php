@@ -102,4 +102,15 @@ class BackendApiManager
         return true;
     }
 
+    public function createPost($data)
+    {
+        
+
+    }
+
+    /*private function createNewPost($data, $group)
+    {
+
+    }*/
+
 }

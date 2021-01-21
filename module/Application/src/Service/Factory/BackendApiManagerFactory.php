@@ -23,7 +23,7 @@ class BackendApiManagerFactory
      */
 
     public function __invoke(ContainerInterface $container)
-    {        
+    {
         $entityManager = $container->get('doctrine.entitymanager.orm_default');
         
         return new BackendApiManager($entityManager);
