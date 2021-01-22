@@ -560,18 +560,11 @@ class BackendApiController extends AbstractActionController
 
     /**
      * Action to handle draft posts
-     * For POST request: This will change the status of a post to "draft"
-     * For GET request: This will return all draft posts or single draft post as specified by id
+     * This will return all draft posts or single draft post as specified by id
      */
     public function draftAction()
     {
         $response = $this->response();
-
-        if ($this->getRequest()->isPost())
-        {
-            $data = $this->params()->fromPost();
-
-        }
 
         if ($this->getRequest()->isGet())
         {
@@ -644,8 +637,55 @@ class BackendApiController extends AbstractActionController
         return new JsonModel($response);
     }
 
-    
+    /**
+     * Action to handle post status revert
+     * This will make a published post 'draft' and a draft post 'published'
+     */
+    public function revertAction()
+    {
+        $response = $this->response();
 
+        if ($this->getRequest()->isPost())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(!is_null($id) && $id > 0){
+                $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => $id, "isDeleted" => false]);
+                if (empty($post)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $post = $this->backendApiManager->switchStatus($post);
+                    if ($post) {
+                        $response = $this->response(200, 'OK');
+                        $postData = [];
+                        $postData['id'] = $post->getId();
+                        $postData['slug'] = $post->getSlug();
+                        $postData['title'] = $post->getPostTitle();
+                        $postData['content'] = $post->getPostBody();
+                        $postData['thumbnail'] = $post->getThumbnailUrl();
+                        $postData['published'] = $post->getIsPublished();
+                        $postData['total_views'] = $post->getTotalViews();
+                        $postData['published'] = $post->getIsPublished();
+                        $postData['group'] = [];
+                        $postData['group']['id'] = $post->getGroup()->getId();
+                        $postData['group']['name'] = $post->getGroup()->getName();
+                        $postData['publisher'] = [];
+                        $postData['publisher']['id'] = $post->getUser()->getId();
+                        $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                        $postData['publisher']['username'] = $post->getUser()->getUsername();
+                        $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                        $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+                        // add post data to json response
+                        $response['postData'] = $postData;
+                    }
+                    else {
+                        $response = $this->response(500, 'INTERNAL SERVER ERROR');
+                    }
+                }
+            }
+        }
 
+        return new JsonModel($response);
+    }
     
 }

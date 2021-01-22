@@ -338,4 +338,20 @@ class BackendApiManager
         return true;
     }
 
+    public function switchStatus(Post $post)
+    {
+        if ($post->getIsPublished() == true) {
+            $post->setIsPublished(false);
+        }
+        else {
+            $post->setIsPublished(true);
+        }
+        $now = new \DateTime;
+        $post->setUpdatedOn($now);
+
+        $this->entityManager->flush();
+
+        return $post;
+    }
+
 }
