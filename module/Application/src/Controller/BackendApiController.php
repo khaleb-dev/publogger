@@ -403,16 +403,49 @@ class BackendApiController extends AbstractActionController
                 $response = $this->response();
             }
             else {
+
                 $form = new PostForm();
                 $form->setData($data);
-                if ($form->isValid()) {
+
+                if ($form->isValid())
+                {
                     $data = $form->getData();
-                    var_dump($data);
-                    exit;
-                    if (isset($data['id'])) { // update the record
+                    if (isset($data['id']))
+                    { // update the record
                         $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($data['id']), "isDeleted" => false]);
-                        $createPost = $this->backendApiManager->updatePost($data);
-                        $response = $this->response(201, 'CREATED');
+                        if (empty($post)) {
+                            $response = $this->response(404, 'NOT FOUND');
+                        }
+                        else {
+                            $post = $this->backendApiManager->updatePost($post, $data);
+                            if ($post == false) {
+                                $response = $this->response(406, 'NOT ACCEPTABLE');
+                            }
+                            else {
+                                $response = $this->response(200, 'OK');
+                                $postData = [];
+                                $postData['id'] = $post->getId();
+                                $postData['slug'] = $post->getSlug();
+                                $postData['title'] = $post->getPostTitle();
+                                $postData['content'] = $post->getPostBody();
+                                $postData['thumbnail'] = $post->getThumbnailUrl();
+                                $postData['published'] = $post->getIsPublished();
+                                $postData['total_views'] = $post->getTotalViews();
+                                $postData['published'] = $post->getIsPublished();
+                                $postData['group'] = [];
+                                $postData['group']['id'] = $post->getGroup()->getId();
+                                $postData['group']['name'] = $post->getGroup()->getName();
+                                $postData['publisher'] = [];
+                                $postData['publisher']['id'] = $post->getUser()->getId();
+                                $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                                $postData['publisher']['username'] = $post->getUser()->getUsername();
+                                $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                                $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+                                // add post data to json response
+                                $response['postData'] = $postData;
+                            }
+                            
+                        }
                     }
                     else { // create new record
                         $createPost = $this->backendApiManager->createPost($data);

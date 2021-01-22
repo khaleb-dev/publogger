@@ -141,113 +141,172 @@ class BackendApiManager
 
     public function createPost($data)
     {
-        
-
+        $post = new Post();
+        $data['isUpdate'] = false;
+        return $this->handlePost($data, $post);
     }
-    private function saveDraft($data, $type)
+
+    public function updatePost($post, $data)
     {
-        // if group field was not sent or is an empty string, we will use the system default.
-        // The system must have a default group
-        if(isset($data['group']) && !is_null($data['group']) && $data['group'] != "")
+        $data['isUpdate'] = true;
+        return $this->handlePost($data, $post);
+    }
+
+    private function handlePost($data, $post)
+    {
+        var_dump($data);
+        exit;
+        // group setup
+        if(!is_null($data['group']) && $data['group'] != "") { // get the group from database
             $group = $this->entityManager->getRepository(PostGroup::class)->find(intval($data['group']));
-        else
+        } else { // use the system default
             $group = $this->entityManager->getRepository(PostGroup::class)->findOneBy(['isDefault' => true]);
-
-        if ($data['txtTitle'] == "") {
-            $data['txtTitle'] = $this->utility->wordCount(html_entity_decode($this->utility->sanitize($data['txtCompose'])),6);
+        }
+        // if we still can't find the group, return an error
+        if (empty($group)) {
+            return false;
         }
 
-        if (empty($data['txtCustomUrl'])) {
-            $data['txtCustomUrl'] = $this->utility->convertStringToSlug($data['txtTitle']);
-        }
-        else {
-            $data['txtCustomUrl'] = $this->utility->convertStringToSlug($data['txtCustomUrl']);
+        // if theres no title, extract and use first eight words from content as title
+        if (is_null($data['title']) || $data['title'] == "") {
+            $data['title'] = $this->utility->wordCount(html_entity_decode($this->utility->sanitize($data['content'])), 8);
         }
 
-        // Create a DOM object
+        // if theres no slug, generate slug from title
+        if (is_null($data['slug']) || $data['slug'] == "") {
+            $data['slug'] = $this->utility->convertStringToSlug($data['title']);
+        }
+        else { // format the slug
+            $data['slug'] = $this->utility->convertStringToSlug($data['slug']);
+        }
+
+        // we want to extract all our image files from content so as to store them in a database table.
+        // Also, we will use the first image as thumbnail for our post if a thumbnail was not sent with
+        // the request payload.
+        // We will use "simple html dom" class for these purpose (thanks to S.C. Chen & co).
+        // First create a DOM object
         $html = new simple_html_dom();
-        // Load HTML from a string
-        $dhd = $html->load($data['txtCompose']);
+        // Load HTML from content string
+        $loadedHtmlContent = $html->load($data['content']);
         // Iterate to get element from object and arrange as associative array
         $imgArr = [];
-        foreach ($dhd->find('img') as $i) {
+        foreach ($loadedHtmlContent->find('img') as $i) {
             $imgArr[] = ['imgSrc' => $i->src];
         }
-        // article thumbnail  
-        if (empty($imgArr)) {
-            $data['thumbnail'] = null;
-        } else {
-            $fI = $imgArr[0]['imgSrc'];
-            $sT = explode("/", $fI);
-            $dT = explode("_", end($sT));
-            if ($dT[0] == 'coc') {
+
+        // set thumbnail
+        if (is_null($data['thumbnail']) || $data['thumbnail'] == "") {
+            if (!empty($imgArr)) { // thumbnail will only be set if there's an image in the post content
+                $fI = $imgArr[0]['imgSrc'];
+                $sT = explode("/", $fI);
+                
                 $data['thumbnail'] = end($sT);
-            } else {
-                $data['thumbnail'] = null;
             }
         }
 
-        // check if hdnArticleId has value, if yes, use the value as id to update the article instead of creating new.
-        if (!empty($data['hdnArticleId'])) {
-            // be sure that this article exists
-            $article = $this->entityManager->getRepository(Article::class)->find($data['hdnArticleId']);
-            if (!empty($article) && !is_null($article)) {
-                // proceed to update the matched article. 
-                // NOTE: that the article will be saved as draft!
-                $data['txtCompose'] = htmlentities(trim($data['txtCompose']), ENT_QUOTES, 'UTF-8');
-                $updated = $this->editorManager->updateArticle($article, $data, $category, $status, $imgArr);
-                if ($updated) {
-                    $article = $this->entityManager->getRepository(Article::class)->find($data['hdnArticleId']);
-                    return new JsonModel([
-                                            'code' => 200,
-                                            'status' => 'updated',
-                                            'message' => 'I\'ve saved your article as Draft by updating the previous copy I found.',
-                                            'identity' => $article->getId(),
-                                            'slug' => $article->getSlug(),
-                                        ]);
-                }
-                else {
-                    return new JsonModel([
-                                            'code' => 500,
-                                            'status' => 'failed',
-                                            'message' => 'I was unable to save your article as Draft.'
-                                        ]);
-                }
-            }
-            else {
-                return new JsonModel([
-                                        'code' => 404,
-                                        'status' => 'warning',
-                                        'message' => 'I was instructed never to update phantom Articles. They are treats to my existence.'
-                                    ]);
-            }
+        // set publish status
+        if ($data['publish'] == 'true') {
+            $data['publish'] = true;
         }
         else {
-            // this will create an absolutely new article as "Draft"!
-            $data['txtCompose'] = htmlentities(trim($data['txtCompose']), ENT_QUOTES, 'UTF-8');
-            $created = $this->editorManager->createArticle($data, $category, $type, $this->currentUser(), $status, $imgArr);
+            $data['publish'] = false;
+        }
 
-            if (!empty($created) && !is_null($created)) {
-                return new JsonModel([
-                                        'code' => 200,
-                                        'status' => 'success',
-                                        'message' => 'Your new Article has been saved as a Draft.',
-                                        'identity' => $created->getId(),
-                                        'slug' => $created->getSlug(),
-                                    ]);
-            } 
+        // time to save the data to db
+        $data['content'] = htmlentities(trim($data['content']), ENT_QUOTES, 'UTF-8');
+        $now = new \DateTime;
+
+        $post->setGroup($group);
+        $post->setUser($group);
+        $post->setSlug($data['slug']);
+        $post->setPostTitle($data['title']);
+        $post->setThumbnailUrl($data['thumbnail']);
+        $post->setPostBody($data['content']);
+        $post->setIsPublished($data['publish']);
+        $post->setIsDeleted(false);
+
+        if ($data['isUpdate'] == false) {
+            $post->setTotalViews(0);
+            $post->setPublishedOn($now);
+            $post->setUpdatedOn($now);
+        }
+        else {
+            $post->setUpdatedOn($now);
+        }
+
+        $this->entityManager->persist($post);
+
+        // lets save the images too
+        // we are going to keep record of images related to each post, hence we iterate the 
+        // imgArr array if it is not empty.
+        if (!empty($imgArr)) {
+            $this->linkImagesToPost($imgArr, $post);
+        }
+
+        // lets not forget to add tags if avialable
+        if (!is_null($data['tags']) && $data['tags'] != "") {
+            $this->addTagsToPost($data['tags'], $article);
+        }
+
+        $this->entityManager->flush();
+
+        return $post;
+    }
+
+    private function linkImagesToPost(array $images, $post)
+    {
+        $now = new \DateTime('now');
+        foreach ($images as $img) {
+            $sT = explode("/", $img['imgSrc']);
+            // confirm existence of such imageURL on image table
+            $image = $this->entityManager->getRepository(Image::class)->findOneBy(['name' => end($sT)]);
+            // if it exists, proceed to PostImages table
+            if (!empty($image) && !is_null($image)) {
+                // To prevent multiple entry on PostImages table, be sure that it does not exist here
+                $imagePost = $this->entityManager->getRepository(PostImages::class)->findOneBy(['image' => $image, 'post' => $post]);
+                // if it does not exist, record it.
+                if (empty($imagePost) || is_null($imagePost)) {
+                    // create new record
+                    $newImgPost = new PostImages();
+                    
+                    $newImgPost->setImage($image);
+                    $newImgPost->setPost($post);
+                    $newImgPost->setCreatedAt($now);
+
+                    $this->entityManager->persist($newImgPost);
+                }
+            }
             else {
-                return new JsonModel([
-                                        'code' => 500,
-                                        'status' => 'error',
-                                        'message' => 'I am unable to perform this task at the moment. Please, try again later.',
-                                    ]);
+                continue;
             }
         }
+        return true;
     }
-    /*private function createNewPost($data, $group)
-    {
 
-    }*/
+    private function addTagsToPost(String $tags, $post)
+    {
+        $now = new \DateTime('now');
+        $breakTag = explode(',', $tags);
+        foreach ($breakTag as $tag) {
+            if ($tag != '') {
+                $tag = $this->entityManager->getRepository(Tags::class)->find($tag);
+
+                if (!empty($tag) && !is_null($tag)) {
+                    $postTag = new PostTags();
+
+                    $postTag->setPost($post);
+                    $postTag->setTag($tag);
+                    $postTag->setCreatedAt($now);
+                    $postTag->setUpdatedAt($now);
+
+                    $this->entityManager->persist($postTag);
+                }
+                else {
+                    continue;
+                }
+            }
+        }
+        return true;
+    }
 
 }
