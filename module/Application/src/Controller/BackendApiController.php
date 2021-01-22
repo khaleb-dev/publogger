@@ -14,7 +14,6 @@ use Laminas\View\Model\JsonModel;
 // use Laminas\Http\Headers;
 // use Laminas\Http\Response;
 use Application\CustomObject\CustomFileUpload;
-use Application\CustomObject\Utility;
 use Application\CustomObject\simple_html_dom;
 use Application\Entity\Images;
 use Application\Entity\Post;
@@ -29,12 +28,11 @@ use Application\Form\PostForm;
 
 class BackendApiController extends AbstractActionController
 {
-    private $backendApiManager = null;
-
-    public function __construct($entityManager, $backendApiManager)
+    public function __construct($entityManager, $backendApiManager, $utility)
     {
         $this->entityManager = $entityManager;
         $this->backendApiManager = $backendApiManager;
+        $this->utility = $utility;
     }
 
     public function indexAction()
@@ -204,6 +202,7 @@ class BackendApiController extends AbstractActionController
                     $groupData['id'] = $group->getId();
                     $groupData['name'] = $group->getName();
                     $groupData['description'] = $group->getDescription();
+                    $groupData['default'] = $group->getIsDefault();
                     $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
 
                     $response['group'] = $groupData;
@@ -227,6 +226,7 @@ class BackendApiController extends AbstractActionController
                 $groupData['id'] = $group->getId();
                 $groupData['name'] = $group->getName();
                 $groupData['description'] = $group->getDescription();
+                $groupData['default'] = $group->getIsDefault();
                 $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
 
                 $response['group'] = $groupData;
@@ -271,6 +271,7 @@ class BackendApiController extends AbstractActionController
                     $groupData['id'] = $group->getId();
                     $groupData['name'] = $group->getName();
                     $groupData['description'] = $group->getDescription();
+                    $groupData['default'] = $group->getIsDefault();
                     $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
 
                     array_push($groupsArr, $groupData);
@@ -406,6 +407,8 @@ class BackendApiController extends AbstractActionController
                 $form->setData($data);
                 if ($form->isValid()) {
                     $data = $form->getData();
+                    var_dump($data);
+                    exit;
                     if (isset($data['id'])) { // update the record
                         $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($data['id']), "isDeleted" => false]);
                         $createPost = $this->backendApiManager->updatePost($data);

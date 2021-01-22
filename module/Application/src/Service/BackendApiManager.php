@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Application\Service;
 
-use Application\CustomObject\Utility;
 use Application\Entity\Images;
 use Application\Entity\Post;
 use Application\Entity\PostGroup;
@@ -20,11 +19,10 @@ use Application\Entity\User;
 
 class BackendApiManager
 {
-    private $entityManager;
-    
-    public function __construct($entityManager)
+    public function __construct($entityManager, $utility)
     {
         $this->entityManager = $entityManager;
+        $this->utility = $utility;
     }
 
     public function createTag($data)
@@ -107,7 +105,106 @@ class BackendApiManager
         
 
     }
+    private function saveDraft($data, $type)
+    {
+        // if group field was not sent or is an empty string, we will use the system default
+        if(isset($data['group']) && !is_null($data['group']) && $data['group'] != "")
+            $group = $this->entityManager->getRepository(PostGroup::class)->find(intval($data['group']));
+        else
+            $group = $this->entityManager->getRepository(PostGroup::class)->find(PostGroup::DEFAULT);
 
+        if ($data['txtTitle'] == "") {
+            $data['txtTitle'] = $this->utility->wordCount(html_entity_decode($this->utility->sanitize($data['txtCompose'])),6);
+        }
+
+        if (empty($data['txtCustomUrl'])) {
+            $data['txtCustomUrl'] = $this->utility->convertStringToSlug($data['txtTitle']);
+        }
+        else {
+            $data['txtCustomUrl'] = $this->utility->convertStringToSlug($data['txtCustomUrl']);
+        }
+
+        // Create a DOM object
+        $html = new simple_html_dom();
+        // Load HTML from a string
+        $dhd = $html->load($data['txtCompose']);
+        // Iterate to get element from object and arrange as associative array
+        $imgArr = [];
+        foreach ($dhd->find('img') as $i) {
+            $imgArr[] = ['imgSrc' => $i->src];
+        }
+        // article thumbnail  
+        if (empty($imgArr)) {
+            $data['thumbnail'] = null;
+        } else {
+            $fI = $imgArr[0]['imgSrc'];
+            $sT = explode("/", $fI);
+            $dT = explode("_", end($sT));
+            if ($dT[0] == 'coc') {
+                $data['thumbnail'] = end($sT);
+            } else {
+                $data['thumbnail'] = null;
+            }
+        }
+
+        // check if hdnArticleId has value, if yes, use the value as id to update the article instead of creating new.
+        if (!empty($data['hdnArticleId'])) {
+            // be sure that this article exists
+            $article = $this->entityManager->getRepository(Article::class)->find($data['hdnArticleId']);
+            if (!empty($article) && !is_null($article)) {
+                // proceed to update the matched article. 
+                // NOTE: that the article will be saved as draft!
+                $data['txtCompose'] = htmlentities(trim($data['txtCompose']), ENT_QUOTES, 'UTF-8');
+                $updated = $this->editorManager->updateArticle($article, $data, $category, $status, $imgArr);
+                if ($updated) {
+                    $article = $this->entityManager->getRepository(Article::class)->find($data['hdnArticleId']);
+                    return new JsonModel([
+                                            'code' => 200,
+                                            'status' => 'updated',
+                                            'message' => 'I\'ve saved your article as Draft by updating the previous copy I found.',
+                                            'identity' => $article->getId(),
+                                            'slug' => $article->getSlug(),
+                                        ]);
+                }
+                else {
+                    return new JsonModel([
+                                            'code' => 500,
+                                            'status' => 'failed',
+                                            'message' => 'I was unable to save your article as Draft.'
+                                        ]);
+                }
+            }
+            else {
+                return new JsonModel([
+                                        'code' => 404,
+                                        'status' => 'warning',
+                                        'message' => 'I was instructed never to update phantom Articles. They are treats to my existence.'
+                                    ]);
+            }
+        }
+        else {
+            // this will create an absolutely new article as "Draft"!
+            $data['txtCompose'] = htmlentities(trim($data['txtCompose']), ENT_QUOTES, 'UTF-8');
+            $created = $this->editorManager->createArticle($data, $category, $type, $this->currentUser(), $status, $imgArr);
+
+            if (!empty($created) && !is_null($created)) {
+                return new JsonModel([
+                                        'code' => 200,
+                                        'status' => 'success',
+                                        'message' => 'Your new Article has been saved as a Draft.',
+                                        'identity' => $created->getId(),
+                                        'slug' => $created->getSlug(),
+                                    ]);
+            } 
+            else {
+                return new JsonModel([
+                                        'code' => 500,
+                                        'status' => 'error',
+                                        'message' => 'I am unable to perform this task at the moment. Please, try again later.',
+                                    ]);
+            }
+        }
+    }
     /*private function createNewPost($data, $group)
     {
 

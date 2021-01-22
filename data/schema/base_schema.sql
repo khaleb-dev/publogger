@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `post_group` (
     `id` INT(2) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `description` VARCHAR(200) NULL,
+	`is_default` TINYINT(1) NOT NULL DEFAULT 0,
 	`created_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`)
 )ENGINE=InnoDB;

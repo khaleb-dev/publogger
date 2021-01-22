@@ -36,6 +36,13 @@ class PostGroup
     private $description;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_default", type="boolean", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $isDefault;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime", precision=0, scale=0, nullable=false, unique=false)
@@ -99,6 +106,30 @@ class PostGroup
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * Set isDefault.
+     *
+     * @param bool $isDefault
+     *
+     * @return PostGroup
+     */
+    public function setIsDefault($isDefault)
+    {
+        $this->isDefault = $isDefault;
+
+        return $this;
+    }
+
+    /**
+     * Get isDefault.
+     *
+     * @return bool
+     */
+    public function getIsDefault()
+    {
+        return $this->isDefault;
     }
 
     /**

@@ -54,6 +54,15 @@ class GroupForm extends Form
                 'label' => 'update',
             ],
         ]);
+
+        // Add "default" field
+        $this->add([
+            'type'  => 'text',
+            'name' => 'default',
+            'options' => [
+                'label' => 'default',
+            ],
+        ]);
     }
 
     private function addInputFilter() 
@@ -103,6 +112,25 @@ class GroupForm extends Form
         // Filter "update" field
         $inputFilter->add([
             'name'     => 'update',
+            'required' => false,
+            'filters'  => [
+                ['name' => 'StringTrim'],
+                ['name' => 'StripTags'],
+                ['name' => 'StripNewlines'],
+            ],                
+            'validators' => [
+                [
+                    'name'    => 'StringLength',
+                    'options' => [
+                        'max' => 5
+                    ],
+                ],
+            ],
+        ]);
+        
+        // Filter "default" field
+        $inputFilter->add([
+            'name'     => 'default',
             'required' => false,
             'filters'  => [
                 ['name' => 'StringTrim'],
