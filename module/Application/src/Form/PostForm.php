@@ -100,7 +100,7 @@ class PostForm extends Form
         // Filter "slug" field
         $inputFilter->add([
             'name'     => 'slug',
-            'required' => true,
+            'required' => false,
             'filters'  => [ 
                 ['name' => 'StringTrim'],
                 ['name' => 'StripTags'],
@@ -209,7 +209,7 @@ class PostForm extends Form
                     'name'    => 'StringLength',
                     'options' => [
                         'min' => 1,
-                        'max' => 3
+                        'max' => 4
                     ],
                 ],
             ],

@@ -11,6 +11,7 @@ namespace Application\Service\Factory;
 
 use Interop\Container\ContainerInterface;
 use Application\Service\BackendApiManager;
+use Application\CustomObject\Utility;
 
 /**
  * This is the factory class for BackendApiManager service. The purpose of the factory
@@ -25,7 +26,8 @@ class BackendApiManagerFactory
     public function __invoke(ContainerInterface $container)
     {
         $entityManager = $container->get('doctrine.entitymanager.orm_default');
+        $utility = new Utility();
         
-        return new BackendApiManager($entityManager);
+        return new BackendApiManager($entityManager, $utility);
     }
 }
