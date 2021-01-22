@@ -53,10 +53,33 @@ class BackendApiManager
         return true;
     }
 
+    /**
+     * This method will check if there are multiple default groups on the database,
+     * if yes, it will reset all 'default' column to false.
+     */
+    private function hotResetFakeGroupDefaults()
+    {
+
+    }
+
     public function createGroup($data)
     {
         $group = new PostGroup();
         $now = new \DateTime;
+        // check if there is a default group in the system
+        $defaultGroup = $this->entityManager->getRepository(PostGroup::class)->findOneBy(['isDefault' => true]);
+        if (empty($defaultGroup)) { // if none, set this new group as default
+            $group->setIsDefault(true);
+        }
+        else { // check if the user wants to set this new group as default
+            if ($data['default'] == "true") {
+                $defaultGroup->setIsDefault(false); // switch default from old group
+                $group->setIsDefault(true);         // to the new group
+            }
+            else {
+                $group->setIsDefault(false);
+            }
+        }
 
         $group->setName($data['name']);
         $group->setDescription($data['description']);
@@ -68,6 +91,22 @@ class BackendApiManager
 
     public function updateGroup(PostGroup $group, $data)
     {
+        // check if there is a default group in the system
+        $defaultGroup = $this->entityManager->getRepository(PostGroup::class)->findOneBy(['isDefault' => true]);
+        // With these block below, the system will be able to force-set a default group even if you unset
+        // the default from database.
+        if (empty($defaultGroup)) { // if none, set this new group as default
+            $group->setIsDefault(true);
+        }
+        else { // check if the user wants to set this new group as default
+            if ($data['default'] == "true") {
+                $defaultGroup->setIsDefault(false); // switch default from old group
+                $group->setIsDefault(true);         // to the new group
+            }
+            else {
+                $group->setIsDefault(false);
+            }
+        }
         $group->setName($data['name']);
         $group->setDescription($data['description']);
         $this->entityManager->flush();
@@ -107,11 +146,12 @@ class BackendApiManager
     }
     private function saveDraft($data, $type)
     {
-        // if group field was not sent or is an empty string, we will use the system default
+        // if group field was not sent or is an empty string, we will use the system default.
+        // The system must have a default group
         if(isset($data['group']) && !is_null($data['group']) && $data['group'] != "")
             $group = $this->entityManager->getRepository(PostGroup::class)->find(intval($data['group']));
         else
-            $group = $this->entityManager->getRepository(PostGroup::class)->find(PostGroup::DEFAULT);
+            $group = $this->entityManager->getRepository(PostGroup::class)->findOneBy(['isDefault' => true]);
 
         if ($data['txtTitle'] == "") {
             $data['txtTitle'] = $this->utility->wordCount(html_entity_decode($this->utility->sanitize($data['txtCompose'])),6);

@@ -131,7 +131,7 @@ class GroupForm extends Form
         // Filter "default" field
         $inputFilter->add([
             'name'     => 'default',
-            'required' => false,
+            'required' => true,
             'filters'  => [
                 ['name' => 'StringTrim'],
                 ['name' => 'StripTags'],
