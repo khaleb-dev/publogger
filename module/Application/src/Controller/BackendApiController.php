@@ -40,7 +40,7 @@ class BackendApiController extends AbstractActionController
         return new JsonModel([]);
     }
 
-    private function response(int $code = 406, string $status = 'NOT ACCEPTABLE')
+    private function response(int $code = 405, string $status = 'METHOD NOT ALLOWED')
     {
         $response = [
             'code' => $code,
@@ -420,6 +420,7 @@ class BackendApiController extends AbstractActionController
                             $post = $this->backendApiManager->updatePost($post, $data);
                             if ($post == false) {
                                 $response = $this->response(406, 'NOT ACCEPTABLE');
+                                $response['message'] = 'Possible Reasons: Unable to find default group.';
                             }
                             else {
                                 $response = $this->response(200, 'OK');
@@ -444,12 +445,37 @@ class BackendApiController extends AbstractActionController
                                 // add post data to json response
                                 $response['postData'] = $postData;
                             }
-                            
                         }
                     }
                     else { // create new record
-                        $createPost = $this->backendApiManager->createPost($data);
-                        $response = $this->response(201, 'CREATED');
+                        $post = $this->backendApiManager->createPost($data);
+                        if ($post == false) {
+                            $response = $this->response(406, 'NOT ACCEPTABLE');
+                            $response['message'] = 'Possible Reasons: Unable to find default group.';
+                        }
+                        else {
+                            $response = $this->response(201, 'CREATED');
+                            $postData = [];
+                            $postData['id'] = $post->getId();
+                            $postData['slug'] = $post->getSlug();
+                            $postData['title'] = $post->getPostTitle();
+                            $postData['content'] = $post->getPostBody();
+                            $postData['thumbnail'] = $post->getThumbnailUrl();
+                            $postData['published'] = $post->getIsPublished();
+                            $postData['total_views'] = $post->getTotalViews();
+                            $postData['published'] = $post->getIsPublished();
+                            $postData['group'] = [];
+                            $postData['group']['id'] = $post->getGroup()->getId();
+                            $postData['group']['name'] = $post->getGroup()->getName();
+                            $postData['publisher'] = [];
+                            $postData['publisher']['id'] = $post->getUser()->getId();
+                            $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                            $postData['publisher']['username'] = $post->getUser()->getUsername();
+                            $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                            $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+                            // add post data to json response
+                            $response['postData'] = $postData;
+                        }
                     }
                 }
                 else {

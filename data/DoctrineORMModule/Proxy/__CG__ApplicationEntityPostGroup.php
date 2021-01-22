@@ -66,10 +66,10 @@ class PostGroup extends \Application\Entity\PostGroup implements \Doctrine\ORM\P
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'id', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'name', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'description', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'createdAt'];
+            return ['__isInitialized__', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'id', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'name', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'description', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'isDefault', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'createdAt'];
         }
 
-        return ['__isInitialized__', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'id', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'name', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'description', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'createdAt'];
+        return ['__isInitialized__', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'id', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'name', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'description', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'isDefault', '' . "\0" . 'Application\\Entity\\PostGroup' . "\0" . 'createdAt'];
     }
 
     /**
@@ -233,6 +233,28 @@ class PostGroup extends \Application\Entity\PostGroup implements \Doctrine\ORM\P
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getDescription', []);
 
         return parent::getDescription();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setIsDefault($isDefault)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setIsDefault', [$isDefault]);
+
+        return parent::setIsDefault($isDefault);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getIsDefault()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getIsDefault', []);
+
+        return parent::getIsDefault();
     }
 
     /**

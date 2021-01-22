@@ -236,6 +236,13 @@ class BackendApiManager
 
         $this->entityManager->persist($post);
 
+        if ($data['isUpdate'] == true) {
+            // unlink old tags
+            $this->unlinkTagsFromPost($post);
+            // unlink old images
+            $this->unlinkImagesFromPost($post);
+        }
+
         // lets save the images too
         // we are going to keep record of images related to each post, hence we iterate the 
         // imgArr array if it is not empty.
@@ -305,6 +312,28 @@ class BackendApiManager
                     continue;
                 }
             }
+        }
+        return true;
+    }
+
+    private function unlinkImagesFromPost(Post $post)
+    {
+        $images = $this->entityManager->getRepository(PostImages::class)->findBy(['post' => $post]);
+        foreach ($images as $img) {
+            $this->entityManager->remove($img);
+            // flush only the images
+            $this->entityManager->flush($img);
+        }
+        return true;
+    }
+
+    private function unlinkTagsFromPost(Post $post)
+    {
+        $tags = $this->entityManager->getRepository(PostTags::class)->findBy(['post' => $article]);
+        foreach ($tags as $tag) {
+            $this->entityManager->remove($tag);
+            // flush only the tag
+            $this->entityManager->flush($tag);
         }
         return true;
     }
