@@ -410,8 +410,10 @@ class BackendApiController extends AbstractActionController
                 if ($form->isValid())
                 {
                     $data = $form->getData();
-                    if (isset($data['id']))
+                    $id = intval($this->params()->fromRoute('id', null));
+                    if (!is_null($id) && ($id > 0))
                     { // update the record
+                        exit('is to update');
                         $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($data['id']), "isDeleted" => false]);
                         if (empty($post)) {
                             $response = $this->response(404, 'NOT FOUND');
@@ -448,6 +450,7 @@ class BackendApiController extends AbstractActionController
                         }
                     }
                     else { // create new record
+                        exit('is NOT update');
                         $post = $this->backendApiManager->createPost($data);
                         if ($post == false) {
                             $response = $this->response(406, 'NOT ACCEPTABLE');
@@ -480,6 +483,74 @@ class BackendApiController extends AbstractActionController
                 }
                 else {
                     $response = $this->response(400, 'BAD REQUEST');
+                }
+            }
+        }
+
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ // return all unpublished post
+                $posts = $this->entityManager->getRepository(Post::class)->findBy(["isDeleted" => false]);
+                if (empty($posts)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $response = $this->response(200, 'OK');
+                    $postsArr = array();
+                    foreach ($posts as $post) {
+                        $postData = [];
+                        $postData['id'] = $post->getId();
+                        $postData['slug'] = $post->getSlug();
+                        $postData['title'] = $post->getPostTitle();
+                        $postData['content'] = $post->getPostBody();
+                        $postData['thumbnail'] = $post->getThumbnailUrl();
+                        $postData['published'] = $post->getIsPublished();
+                        $postData['total_views'] = $post->getTotalViews();
+                        $postData['published'] = $post->getIsPublished();
+                        $postData['group'] = [];
+                        $postData['group']['id'] = $post->getGroup()->getId();
+                        $postData['group']['name'] = $post->getGroup()->getName();
+                        $postData['publisher'] = [];
+                        $postData['publisher']['id'] = $post->getUser()->getId();
+                        $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                        $postData['publisher']['username'] = $post->getUser()->getUsername();
+                        $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                        $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+
+                        array_push($postsArr, $postData);
+                    }
+                    // add post array to json response
+                    $response['postData'] = $postsArr;
+                }
+            }
+            else { // search post by id
+                $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => $id, "isDeleted" => false]);
+                if (empty($post)) {
+                    $response = $this->response(404, 'NOT FOUND');
+                }
+                else {
+                    $response = $this->response(200, 'OK');
+                    $postData = [];
+                    $postData['id'] = $post->getId();
+                    $postData['slug'] = $post->getSlug();
+                    $postData['title'] = $post->getPostTitle();
+                    $postData['content'] = $post->getPostBody();
+                    $postData['thumbnail'] = $post->getThumbnailUrl();
+                    $postData['published'] = $post->getIsPublished();
+                    $postData['total_views'] = $post->getTotalViews();
+                    $postData['published'] = $post->getIsPublished();
+                    $postData['group'] = [];
+                    $postData['group']['id'] = $post->getGroup()->getId();
+                    $postData['group']['name'] = $post->getGroup()->getName();
+                    $postData['publisher'] = [];
+                    $postData['publisher']['id'] = $post->getUser()->getId();
+                    $postData['publisher']['full_name'] = $post->getUser()->getFullName();
+                    $postData['publisher']['username'] = $post->getUser()->getUsername();
+                    $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
+                    $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
+                    // add post data to json response
+                    $response['postData'] = $postData;
                 }
             }
         }
@@ -572,6 +643,8 @@ class BackendApiController extends AbstractActionController
 
         return new JsonModel($response);
     }
+
+    
 
 
     
