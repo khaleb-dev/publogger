@@ -49,11 +49,13 @@ return [
         'factories' => [
             Controller\IndexController::class => InvokableFactory::class,
             Controller\BackendApiController::class => Controller\Factory\BackendApiControllerFactory::class,
+            Controller\FrontendApiController::class => Controller\Factory\FrontendApiControllerFactory::class,
         ],
     ],
     'service_manager' => [
         'factories' => [
             Service\BackendApiManager::class => Service\Factory\BackendApiManagerFactory::class,
+            Service\FrontendApiManager::class => Service\Factory\FrontendApiManagerFactory::class,
         ],
     ],
     // The following registers our custom view 
