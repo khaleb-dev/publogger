@@ -445,11 +445,9 @@ class BackendApiController extends AbstractActionController
 
                 if ($form->isValid())
                 {
-                    //$data = $form->getData();
                     $id = intval($this->params()->fromRoute('id', null));
                     if (!is_null($id) && ($id > 0))
                     { // update the record
-                        //exit('is to update');
                         $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($id), "isDeleted" => false]);
                         if (empty($post)) {
                             $response = $this->response(404, 'NOT FOUND');
@@ -462,43 +460,12 @@ class BackendApiController extends AbstractActionController
                             }
                             else {
                                 $response = $this->response(200, 'OK');
-                                $postData = [];
-                                // find all tags for this post
-                                $postsTags = $this->entityManager->getRepository(PostTags::class)->findBy(["post" => $post]);
-                                $postData['id'] = $post->getId();
-                                $postData['slug'] = $post->getSlug();
-                                $postData['title'] = $post->getPostTitle();
-                                $postData['content'] = $post->getPostBody();
-                                $postData['thumbnail'] = $post->getThumbnailUrl();
-                                $postData['published'] = $post->getIsPublished();
-                                $postData['total_views'] = $post->getTotalViews();
-                                $postData['published'] = $post->getIsPublished();
-                                $postData['group'] = [];
-                                $postData['group']['id'] = $post->getGroup()->getId();
-                                $postData['group']['name'] = $post->getGroup()->getName();
-                                $postData['publisher'] = [];
-                                $postData['publisher']['id'] = $post->getUser()->getId();
-                                $postData['publisher']['full_name'] = $post->getUser()->getFullName();
-                                $postData['publisher']['username'] = $post->getUser()->getUsername();
-                                $postData['tags'] = [];
-                                if (!empty($postsTags) && !is_null($postsTags)) {
-                                    foreach ($postsTags as $tag) {
-                                        $tagData = [];
-                                        $tagData['id'] = $tag->getTag()->getId();
-                                        $tagData['name'] = $tag->getTag()->getName();
-                                        $tagData['description'] = $tag->getTag()->getDescription();
-                                        array_push($postData['tags'], $tagData);
-                                    }
-                                }
-                                $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
-                                $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
                                 // add post data to json response
-                                $response['postData'] = $postData;
+                                $response['postData'] = $this->buildPostData($post);
                             }
                         }
                     }
                     else { // create new record
-                        //exit('is NOT update');
                         $post = $this->backendApiManager->createPost($data);
                         if ($post == false) {
                             $response = $this->response(406, 'NOT ACCEPTABLE');
@@ -506,38 +473,8 @@ class BackendApiController extends AbstractActionController
                         }
                         else {
                             $response = $this->response(201, 'CREATED');
-                            $postData = [];
-                            // find all tags for this post
-                            $postsTags = $this->entityManager->getRepository(PostTags::class)->findBy(["post" => $post]);
-                            $postData['id'] = $post->getId();
-                            $postData['slug'] = $post->getSlug();
-                            $postData['title'] = $post->getPostTitle();
-                            $postData['content'] = $post->getPostBody();
-                            $postData['thumbnail'] = $post->getThumbnailUrl();
-                            $postData['published'] = $post->getIsPublished();
-                            $postData['total_views'] = $post->getTotalViews();
-                            $postData['published'] = $post->getIsPublished();
-                            $postData['group'] = [];
-                            $postData['group']['id'] = $post->getGroup()->getId();
-                            $postData['group']['name'] = $post->getGroup()->getName();
-                            $postData['publisher'] = [];
-                            $postData['publisher']['id'] = $post->getUser()->getId();
-                            $postData['publisher']['full_name'] = $post->getUser()->getFullName();
-                            $postData['publisher']['username'] = $post->getUser()->getUsername();
-                            $postData['tags'] = [];
-                            if (!empty($postsTags) && !is_null($postsTags)) {
-                                foreach ($postsTags as $tag) {
-                                    $tagData = [];
-                                    $tagData['id'] = $tag->getTag()->getId();
-                                    $tagData['name'] = $tag->getTag()->getName();
-                                    $tagData['description'] = $tag->getTag()->getDescription();
-                                    array_push($postData['tags'], $tagData);
-                                }
-                            }
-                            $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
-                            $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
                             // add post data to json response
-                            $response['postData'] = $postData;
+                            $response['postData'] = $this->buildPostData($post);
                         }
                     }
                 }
@@ -663,38 +600,7 @@ class BackendApiController extends AbstractActionController
                     $response = $this->response(200, 'OK');
                     $postsArr = array();
                     foreach ($posts as $post) {
-                        $postData = [];
-                        // find all tags for this post
-                        $postsTags = $this->entityManager->getRepository(PostTags::class)->findBy(["post" => $post]);
-                        $postData['id'] = $post->getId();
-                        $postData['slug'] = $post->getSlug();
-                        $postData['title'] = $post->getPostTitle();
-                        $postData['content'] = $post->getPostBody();
-                        $postData['thumbnail'] = $post->getThumbnailUrl();
-                        $postData['published'] = $post->getIsPublished();
-                        $postData['total_views'] = $post->getTotalViews();
-                        $postData['published'] = $post->getIsPublished();
-                        $postData['group'] = [];
-                        $postData['group']['id'] = $post->getGroup()->getId();
-                        $postData['group']['name'] = $post->getGroup()->getName();
-                        $postData['publisher'] = [];
-                        $postData['publisher']['id'] = $post->getUser()->getId();
-                        $postData['publisher']['full_name'] = $post->getUser()->getFullName();
-                        $postData['publisher']['username'] = $post->getUser()->getUsername();
-                        $postData['tags'] = [];
-                        if (!empty($postsTags) && !is_null($postsTags)) {
-                            foreach ($postsTags as $tag) {
-                                $tagData = [];
-                                $tagData['id'] = $tag->getTag()->getId();
-                                $tagData['name'] = $tag->getTag()->getName();
-                                $tagData['description'] = $tag->getTag()->getDescription();
-                                array_push($postData['tags'], $tagData);
-                            }
-                        }
-                        $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
-                        $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
-
-                        array_push($postsArr, $postData);
+                        array_push($postsArr, $this->buildPostData($post));
                     }
                     // add post array to json response
                     $response['postData'] = $postsArr;
@@ -708,7 +614,7 @@ class BackendApiController extends AbstractActionController
                 else {
                     $response = $this->response(200, 'OK');
                     // add post data to json response
-                    $response['postData'] = $postData;
+                    $response['postData'] = $this->buildPostData($post);
                 }
             }
         }
@@ -736,38 +642,8 @@ class BackendApiController extends AbstractActionController
                     $post = $this->backendApiManager->switchStatus($post);
                     if ($post) {
                         $response = $this->response(200, 'OK');
-                        $postData = [];
-                        // find all tags for this post
-                        $postsTags = $this->entityManager->getRepository(PostTags::class)->findBy(["post" => $post]);
-                        $postData['id'] = $post->getId();
-                        $postData['slug'] = $post->getSlug();
-                        $postData['title'] = $post->getPostTitle();
-                        $postData['content'] = $post->getPostBody();
-                        $postData['thumbnail'] = $post->getThumbnailUrl();
-                        $postData['published'] = $post->getIsPublished();
-                        $postData['total_views'] = $post->getTotalViews();
-                        $postData['published'] = $post->getIsPublished();
-                        $postData['group'] = [];
-                        $postData['group']['id'] = $post->getGroup()->getId();
-                        $postData['group']['name'] = $post->getGroup()->getName();
-                        $postData['publisher'] = [];
-                        $postData['publisher']['id'] = $post->getUser()->getId();
-                        $postData['publisher']['full_name'] = $post->getUser()->getFullName();
-                        $postData['publisher']['username'] = $post->getUser()->getUsername();
-                        $postData['tags'] = [];
-                        if (!empty($postsTags) && !is_null($postsTags)) {
-                            foreach ($postsTags as $tag) {
-                                $tagData = [];
-                                $tagData['id'] = $tag->getTag()->getId();
-                                $tagData['name'] = $tag->getTag()->getName();
-                                $tagData['description'] = $tag->getTag()->getDescription();
-                                array_push($postData['tags'], $tagData);
-                            }
-                        }
-                        $postData['published_on'] = $post->getPublishedOn()->format('Y-m-d H:i:s');
-                        $postData['updated_on'] = $post->getUpdatedOn()->format('Y-m-d H:i:s');
                         // add post data to json response
-                        $response['postData'] = $postData;
+                        $response['postData'] = $this->buildPostData($post);
                     }
                     else {
                         $response = $this->response(500, 'INTERNAL SERVER ERROR');
