@@ -409,12 +409,12 @@ class BackendApiController extends AbstractActionController
 
                 if ($form->isValid())
                 {
-                    $data = $form->getData();
+                    //$data = $form->getData();
                     $id = intval($this->params()->fromRoute('id', null));
                     if (!is_null($id) && ($id > 0))
                     { // update the record
-                        exit('is to update');
-                        $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($data['id']), "isDeleted" => false]);
+                        //exit('is to update');
+                        $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => intval($id), "isDeleted" => false]);
                         if (empty($post)) {
                             $response = $this->response(404, 'NOT FOUND');
                         }
@@ -450,7 +450,7 @@ class BackendApiController extends AbstractActionController
                         }
                     }
                     else { // create new record
-                        exit('is NOT update');
+                        //exit('is NOT update');
                         $post = $this->backendApiManager->createPost($data);
                         if ($post == false) {
                             $response = $this->response(406, 'NOT ACCEPTABLE');

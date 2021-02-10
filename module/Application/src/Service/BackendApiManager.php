@@ -16,6 +16,7 @@ use Application\Entity\PostImages;
 use Application\Entity\PostTags;
 use Application\Entity\Tags;
 use Application\Entity\User;
+use Application\CustomObject\simple_html_dom;
 
 class BackendApiManager
 {
@@ -154,8 +155,8 @@ class BackendApiManager
 
     private function handlePost($data, $post)
     {
-        var_dump($data);
-        exit;
+        // var_dump($data);
+        // exit;
         // group setup
         if(!is_null($data['group']) && $data['group'] != "") { // get the group from database
             $group = $this->entityManager->getRepository(PostGroup::class)->find(intval($data['group']));
@@ -168,12 +169,12 @@ class BackendApiManager
         }
 
         // if theres no title, extract and use first eight words from content as title
-        if (is_null($data['title']) || $data['title'] == "") {
+        if (!isset($data['title']) || is_null($data['title']) || $data['title'] == "") {
             $data['title'] = $this->utility->wordCount(html_entity_decode($this->utility->sanitize($data['content'])), 8);
         }
 
         // if theres no slug, generate slug from title
-        if (is_null($data['slug']) || $data['slug'] == "") {
+        if (!isset($data['slug']) || is_null($data['slug']) || $data['slug'] == "") {
             $data['slug'] = $this->utility->convertStringToSlug($data['title']);
         }
         else { // format the slug
@@ -195,12 +196,15 @@ class BackendApiManager
         }
 
         // set thumbnail
-        if (is_null($data['thumbnail']) || $data['thumbnail'] == "") {
+        if (!isset($data['thumbnail']) || is_null($data['thumbnail']) || $data['thumbnail'] == "") {
             if (!empty($imgArr)) { // thumbnail will only be set if there's an image in the post content
                 $fI = $imgArr[0]['imgSrc'];
                 $sT = explode("/", $fI);
                 
                 $data['thumbnail'] = end($sT);
+            }
+            else {
+                $data['thumbnail'] = null;
             }
         }
 
@@ -217,7 +221,8 @@ class BackendApiManager
         $now = new \DateTime;
 
         $post->setGroup($group);
-        $post->setUser($group);
+        $user = $this->entityManager->getRepository(User::class)->find(1); // this will not be used in the future when we implement user auth.
+        $post->setUser($user);
         $post->setSlug($data['slug']);
         $post->setPostTitle($data['title']);
         $post->setThumbnailUrl($data['thumbnail']);
@@ -251,8 +256,8 @@ class BackendApiManager
         }
 
         // lets not forget to add tags if avialable
-        if (!is_null($data['tags']) && $data['tags'] != "") {
-            $this->addTagsToPost($data['tags'], $article);
+        if (isset($data['tags']) && !is_null($data['tags']) && $data['tags'] != "") {
+            $this->addTagsToPost($data['tags'], $post);
         }
 
         $this->entityManager->flush();
@@ -304,7 +309,6 @@ class BackendApiManager
                     $postTag->setPost($post);
                     $postTag->setTag($tag);
                     $postTag->setCreatedAt($now);
-                    $postTag->setUpdatedAt($now);
 
                     $this->entityManager->persist($postTag);
                 }
@@ -329,7 +333,7 @@ class BackendApiManager
 
     private function unlinkTagsFromPost(Post $post)
     {
-        $tags = $this->entityManager->getRepository(PostTags::class)->findBy(['post' => $article]);
+        $tags = $this->entityManager->getRepository(PostTags::class)->findBy(['post' => $post]);
         foreach ($tags as $tag) {
             $this->entityManager->remove($tag);
             // flush only the tag
