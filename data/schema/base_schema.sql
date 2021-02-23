@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `post` (
 	`post_body` MEDIUMTEXT NOT NULL,
 	`thumbnail_url` VARCHAR(200) NULL,
 	`total_views` INT(9) NOT NULL DEFAULT 0,
+	`last_viewed_on` DATETIME NOT NULL,
 	`published_on` DATETIME NOT NULL,
 	`updated_on` DATETIME NOT NULL,
     PRIMARY KEY (`id`),

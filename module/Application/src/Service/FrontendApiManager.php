@@ -26,4 +26,15 @@ class FrontendApiManager
         $this->utility = $utility;
     }
 
+    public function incrementPostView(Post $post) : Post
+    {
+        $now = new \DateTime;
+
+        $post->setTotalViews($post->getTotalViews()+1);
+        $post->setLastViewedOn($now);
+        $this->entityManager->flush();
+
+        return $post;
+    }
+
 }

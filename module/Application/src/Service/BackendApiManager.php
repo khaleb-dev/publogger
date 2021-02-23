@@ -155,8 +155,6 @@ class BackendApiManager
 
     private function handlePost($data, $post)
     {
-        // var_dump($data);
-        // exit;
         // group setup
         if(!is_null($data['group']) && $data['group'] != "") { // get the group from database
             $group = $this->entityManager->getRepository(PostGroup::class)->find(intval($data['group']));
@@ -232,6 +230,7 @@ class BackendApiManager
 
         if ($data['isUpdate'] == false) {
             $post->setTotalViews(0);
+            $post->setLastViewedOn($now);
             $post->setPublishedOn($now);
             $post->setUpdatedOn($now);
         }

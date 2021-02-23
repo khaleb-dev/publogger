@@ -73,6 +73,13 @@ class Post
     /**
      * @var \DateTime
      *
+     * @ORM\Column(name="last_viewed_on", type="datetime", precision=0, scale=0, nullable=false, unique=false)
+     */
+    private $lastViewedOn;
+
+    /**
+     * @var \DateTime
+     *
      * @ORM\Column(name="published_on", type="datetime", precision=0, scale=0, nullable=false, unique=false)
      */
     private $publishedOn;
@@ -281,6 +288,30 @@ class Post
     public function getTotalViews()
     {
         return $this->totalViews;
+    }
+
+    /**
+     * Set lastViewedOn.
+     *
+     * @param \DateTime $lastViewedOn
+     *
+     * @return Post
+     */
+    public function setLastViewedOn($lastViewedOn)
+    {
+        $this->lastViewedOn = $lastViewedOn;
+
+        return $this;
+    }
+
+    /**
+     * Get lastViewedOn.
+     *
+     * @return \DateTime
+     */
+    public function getLastViewedOn()
+    {
+        return $this->lastViewedOn;
     }
 
     /**

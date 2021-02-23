@@ -403,6 +403,7 @@ class BackendApiController extends AbstractActionController
         $postData['thumbnail'] = $post->getThumbnailUrl();
         $postData['published'] = $post->getIsPublished();
         $postData['total_views'] = $post->getTotalViews();
+        $postData['last_viewed_on'] = $post->getLastViewedOn()->format('Y-m-d H:i:s');
         $postData['published'] = $post->getIsPublished();
         $postData['group'] = [];
         $postData['group']['id'] = $post->getGroup()->getId();

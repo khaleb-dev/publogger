@@ -67,6 +67,7 @@ class FrontendApiController extends AbstractActionController
         $postData['thumbnail'] = $post->getThumbnailUrl();
         $postData['published'] = $post->getIsPublished();
         $postData['total_views'] = $post->getTotalViews();
+        $postData['last_viewed_on'] = $post->getLastViewedOn()->format('Y-m-d H:i:s');
         $postData['published'] = $post->getIsPublished();
         $postData['group'] = [];
         $postData['group']['id'] = $post->getGroup()->getId();
@@ -120,6 +121,8 @@ class FrontendApiController extends AbstractActionController
                 }
                 else {
                     $response = $this->response(200, 'OK');
+                    // increment the number of views
+                    $post = $this->frontendApiManager->incrementPostView($post);
                     // add post data to json response
                     $response['postData'] = $this->buildPostData($post);
                 }
