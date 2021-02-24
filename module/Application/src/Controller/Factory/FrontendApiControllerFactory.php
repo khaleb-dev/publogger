@@ -23,7 +23,7 @@ class FrontendApiControllerFactory
     /**
      * This method creates the FrontendApiController and returns its instance. 
      */
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container) : FrontendApiController
     {
         $entityManager = $container->get('doctrine.entitymanager.orm_default');
         $frontendApiManager = $container->get(FrontendApiManager::class);

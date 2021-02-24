@@ -34,7 +34,7 @@ class FrontendApiController extends AbstractActionController
         $this->utility = $utility;
     }
 
-    public function indexAction()
+    public function indexAction() : JsonModel
     {
         return new JsonModel([]);
     }
@@ -42,7 +42,7 @@ class FrontendApiController extends AbstractActionController
     /**
      * set response
      */
-    private function response(int $code = 405, string $status = 'METHOD NOT ALLOWED')
+    private function response(int $code = 405, string $status = 'METHOD NOT ALLOWED') : array
     {
         $response = [
             'code' => $code,
@@ -55,7 +55,7 @@ class FrontendApiController extends AbstractActionController
     /**
      * build post data once
      */
-    private function buildPostData($post)
+    private function buildPostData($post) : array
     {
         $postData = [];
         // find all tags for this post
@@ -92,7 +92,7 @@ class FrontendApiController extends AbstractActionController
         return $postData;
     }
 
-    public function blogPostsAction()
+    public function blogPostsAction() : JsonModel
     {
         $response = $this->response();
 

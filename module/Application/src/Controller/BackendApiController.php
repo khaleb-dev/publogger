@@ -35,7 +35,7 @@ class BackendApiController extends AbstractActionController
         $this->utility = $utility;
     }
 
-    public function indexAction()
+    public function indexAction() : JsonModel
     {
         return new JsonModel([]);
     }
@@ -56,7 +56,7 @@ class BackendApiController extends AbstractActionController
     /**
      * Action to handle tag
      */
-    public function tagAction()
+    public function tagAction() : JsonModel
     {
         $response = $this->response();
 
@@ -139,7 +139,7 @@ class BackendApiController extends AbstractActionController
     /**
      * Action to handle tags
      */
-    public function tagsAction()
+    public function tagsAction() : JsonModel
     {
         $response = $this->response();
         
@@ -173,7 +173,7 @@ class BackendApiController extends AbstractActionController
     /**
      * Action to handle group
      */
-    public function groupAction()
+    public function groupAction() : JsonModel
     {
         $response = $this->response();
 
@@ -255,7 +255,7 @@ class BackendApiController extends AbstractActionController
     /**
      * Action to handle groups
      */
-    public function groupsAction()
+    public function groupsAction() : JsonModel
     {
         $response = $this->response();
         
@@ -291,7 +291,7 @@ class BackendApiController extends AbstractActionController
      * Action to handle image upload
      * Make sure you create the 'i1m2a3g4e5s' folder inside public dir to store uploaded images
      */
-    public function uploadImageAction()
+    public function uploadImageAction() : JsonModel
     {
         $response = $this->response();
         
@@ -391,7 +391,7 @@ class BackendApiController extends AbstractActionController
     /**
      * build post data once
      */
-    private function buildPostData($post)
+    private function buildPostData($post) : array
     {
         $postData = [];
         // find all tags for this post
@@ -435,7 +435,7 @@ class BackendApiController extends AbstractActionController
      * It will set the post status as "draft" or "publish" based on the status passed in the request payload.
      * By default, the post status is "draft"
      */
-    public function postAction()
+    public function postAction() : JsonModel
     {
         $response = $this->response();
 
@@ -529,7 +529,7 @@ class BackendApiController extends AbstractActionController
      * Action to handle draft posts
      * This will return all draft posts or single draft post as specified by id
      */
-    public function draftAction()
+    public function draftAction() : JsonModel
     {
         $response = $this->response();
 
@@ -571,7 +571,7 @@ class BackendApiController extends AbstractActionController
      * Action to handle post status revert
      * This will make a published post 'draft' and a draft post 'published'
      */
-    public function revertAction()
+    public function revertAction() : JsonModel
     {
         $response = $this->response();
 

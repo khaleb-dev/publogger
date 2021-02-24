@@ -63,7 +63,7 @@ class BackendApiManager
 
     }
 
-    public function createGroup($data)
+    public function createGroup($data) : PostGroup
     {
         $group = new PostGroup();
         $now = new \DateTime;
@@ -90,7 +90,7 @@ class BackendApiManager
         return $group;
     }
 
-    public function updateGroup(PostGroup $group, $data)
+    public function updateGroup(PostGroup $group, $data) : PostGroup
     {
         // check if there is a default group in the system
         $defaultGroup = $this->entityManager->getRepository(PostGroup::class)->findOneBy(['isDefault' => true]);
@@ -114,14 +114,14 @@ class BackendApiManager
         return $group;
     }
 
-    public function deleteGroup(PostGroup $group)
+    public function deleteGroup(PostGroup $group) : bool
     {
         $this->entityManager->remove($group);
         $this->entityManager->flush();
         return true;
     }
 
-    public function saveImage(string $filename)
+    public function saveImage(string $filename) : Images
     {
         $image = new Images();
         $now = new \DateTime;
@@ -133,7 +133,7 @@ class BackendApiManager
         return $image;
     }
 
-    public function deleteImage(Images $image)
+    public function deleteImage(Images $image) : bool
     {
         $this->entityManager->remove($image);
         $this->entityManager->flush();
@@ -264,7 +264,7 @@ class BackendApiManager
         return $post;
     }
 
-    private function linkImagesToPost(array $images, $post)
+    private function linkImagesToPost(array $images, $post) : bool
     {
         $now = new \DateTime('now');
         foreach ($images as $img) {
@@ -294,7 +294,7 @@ class BackendApiManager
         return true;
     }
 
-    private function addTagsToPost(String $tags, $post)
+    private function addTagsToPost(String $tags, $post) : bool
     {
         $now = new \DateTime('now');
         $breakTag = explode(',', $tags);
@@ -319,7 +319,7 @@ class BackendApiManager
         return true;
     }
 
-    private function unlinkImagesFromPost(Post $post)
+    private function unlinkImagesFromPost(Post $post) : bool
     {
         $images = $this->entityManager->getRepository(PostImages::class)->findBy(['post' => $post]);
         foreach ($images as $img) {
@@ -330,7 +330,7 @@ class BackendApiManager
         return true;
     }
 
-    private function unlinkTagsFromPost(Post $post)
+    private function unlinkTagsFromPost(Post $post) : bool
     {
         $tags = $this->entityManager->getRepository(PostTags::class)->findBy(['post' => $post]);
         foreach ($tags as $tag) {
@@ -341,7 +341,7 @@ class BackendApiManager
         return true;
     }
 
-    public function switchStatus(Post $post)
+    public function switchStatus(Post $post) : Post
     {
         if ($post->getIsPublished() == true) {
             $post->setIsPublished(false);
