@@ -11,9 +11,9 @@ namespace Application\Controller;
 
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
-// use Laminas\Http\Headers;
-// use Laminas\Http\Response;
+use Laminas\Http\Header\Authorization;
 use Application\CustomObject\simple_html_dom;
+use Application\CustomObject\AuthHeader;
 use Application\Entity\Images;
 use Application\Entity\Post;
 use Application\Entity\PostGroup;
@@ -131,5 +131,7 @@ class FrontendApiController extends AbstractActionController
 
         return new JsonModel($response);
     }
+
+    // public function 
     
 }
