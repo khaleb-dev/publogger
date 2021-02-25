@@ -31,7 +31,7 @@ return [
             'backend-api' => [
                 'type' => Segment::class,
                 'options' => [
-                    'route'    => '/control/:action[/:id]',
+                    'route'    => '/base/:action[/:id]',
                     'constraints' => [
                         'api-key' => '[a-zA-Z][a-zA-Z0-9_-]*',
                         'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
@@ -43,20 +43,20 @@ return [
                     ],
                 ],
             ],
-            // 'frontend-api' => [
-            //     'type' => Segment::class,
-            //     'options' => [
-            //         'route'    => '/:action[/:id]',
-            //         'constraints' => [
-            //             'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
-            //             'id' => '[a-zA-Z0-9_-]*',
-            //         ],
-            //         'defaults' => [
-            //             'controller'    => Controller\FrontendApiController::class,
-            //             'action'        => 'index',
-            //         ],
-            //     ],
-            // ],
+            'frontend-api' => [
+                'type' => Segment::class,
+                'options' => [
+                    'route'    => '/:action[/:id]',
+                    'constraints' => [
+                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                        'id' => '[a-zA-Z0-9_-]*',
+                    ],
+                    'defaults' => [
+                        'controller'    => Controller\FrontendApiController::class,
+                        'action'        => 'index',
+                    ],
+                ],
+            ],
         ],
     ],
     'controllers' => [
