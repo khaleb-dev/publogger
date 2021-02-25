@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Application\CustomObject;
+namespace Application\Auth\Factory;
 
 use Laminas\Http\Header\Authorization;
 

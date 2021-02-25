@@ -72,6 +72,15 @@ return [
             Service\FrontendApiManager::class => Service\Factory\FrontendApiManagerFactory::class,
         ],
     ],
+    // We register module-provided controller plugins under this key.
+    'controller_plugins' => [
+        'factories' => [
+            Auth\AuthPlugin::class => Auth\Factory\AuthPluginFactory::class,
+        ],
+        'aliases' => [
+            'auth' => Auth\AuthPlugin::class,
+        ],
+    ],
     // The following registers our custom view 
     // helper classes in view plugin manager.
     'view_manager' => [

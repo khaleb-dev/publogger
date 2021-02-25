@@ -11,10 +11,8 @@ namespace Application\Controller;
 
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
-use Laminas\Http\Header\Authorization;
 use Application\CustomObject\CustomFileUpload;
 use Application\CustomObject\simple_html_dom;
-use Application\CustomObject\AuthHeader;
 use Application\Entity\Images;
 use Application\Entity\Post;
 use Application\Entity\PostGroup;
@@ -53,14 +51,6 @@ class BackendApiController extends AbstractActionController
         return $response;
     }
 
-    private function getAuthHeaderToken($auth)
-    {
-        $h = new AuthHeader();
-        $r = $h->getAuthToken($auth);
-
-        return $r->token;
-    }
-
     /**
      * Action to handle tag
      */
@@ -68,7 +58,10 @@ class BackendApiController extends AbstractActionController
     {
         $response = $this->response();
 
-        $token = $this->getAuthHeaderToken($this->params()->fromHeader('authorization'));
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+
+        echo($token);
+        exit();
         
         if ($this->getRequest()->isPost())
         {
