@@ -60,7 +60,7 @@ class BackendApiController extends AbstractActionController
 
         $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
         if (is_null($token)){
-            return new JsonModel($response);
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
         }
         
         if ($this->getRequest()->isPost())
@@ -142,6 +142,11 @@ class BackendApiController extends AbstractActionController
     public function tagsAction() : JsonModel
     {
         $response = $this->response();
+
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
         
         if ($this->getRequest()->isGet())
         {
@@ -176,6 +181,11 @@ class BackendApiController extends AbstractActionController
     public function groupAction() : JsonModel
     {
         $response = $this->response();
+
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
 
         if ($this->getRequest()->isPost())
         {
@@ -258,6 +268,11 @@ class BackendApiController extends AbstractActionController
     public function groupsAction() : JsonModel
     {
         $response = $this->response();
+
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
         
         if ($this->getRequest()->isGet())
         {
@@ -294,6 +309,11 @@ class BackendApiController extends AbstractActionController
     public function uploadImageAction() : JsonModel
     {
         $response = $this->response();
+
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
         
         if ($this->getRequest()->isPost())
         {
@@ -439,6 +459,11 @@ class BackendApiController extends AbstractActionController
     {
         $response = $this->response();
 
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
+
         if ($this->getRequest()->isPost())
         {
             $data = $this->params()->fromPost();
@@ -533,6 +558,11 @@ class BackendApiController extends AbstractActionController
     {
         $response = $this->response();
 
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
+
         if ($this->getRequest()->isGet())
         {
             $id = intval($this->params()->fromRoute('id', null));
@@ -574,6 +604,11 @@ class BackendApiController extends AbstractActionController
     public function revertAction() : JsonModel
     {
         $response = $this->response();
+
+        $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
+        if (is_null($token)){
+            return new JsonModel($this->response(400, 'BAD REQUEST'));
+        }
 
         if ($this->getRequest()->isPost())
         {
