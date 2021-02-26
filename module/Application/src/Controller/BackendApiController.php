@@ -59,9 +59,9 @@ class BackendApiController extends AbstractActionController
         $response = $this->response();
 
         $token = $this->auth()->getAuthToken($this->params()->fromHeader('authorization'));
-
-        echo($token);
-        exit();
+        if (is_null($token)){
+            return new JsonModel($response);
+        }
         
         if ($this->getRequest()->isPost())
         {

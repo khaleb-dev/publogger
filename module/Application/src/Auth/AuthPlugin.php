@@ -22,9 +22,12 @@ class AuthPlugin extends AbstractPlugin
 
     public function getAuthToken($auth)
     {
-        $r = $this->header->getAuthToken($auth);
-
-        return $r->token;
+        if (!is_null($auth)){
+            $r = $this->header->getAuthToken($auth);
+    
+            return $r->token;
+        }
+        return null;
     }
 
     public function validateAuthToken($auth)
