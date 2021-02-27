@@ -130,6 +130,64 @@ class FrontendApiController extends AbstractActionController
         return new JsonModel($response);
     }
 
-    // public function 
+    public function tagAction() : JsonModel
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            $tag = $this->entityManager->getRepository(Tags::class)->find($id);
+            if (empty($tag)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $tagData = [];
+                $tagData['id'] = $tag->getId();
+                $tagData['name'] = $tag->getName();
+                $tagData['description'] = $tag->getDescription();
+                $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                $response['tag'] = $tagData;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+    /**
+     * Action to handle tags
+     */
+    public function tagsAction() : JsonModel
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            $tags = $this->entityManager->getRepository(Tags::class)->findAll();
+            if (empty($tags)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $tagsData = array();
+                foreach ($tags as $tag) {
+                    $tagData = [];
+                    $tagData['id'] = $tag->getId();
+                    $tagData['name'] = $tag->getName();
+                    $tagData['description'] = $tag->getDescription();
+                    $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                    array_push($tagsData, $tagData);
+                }
+
+                $response['tags'] = $tagsData;
+            }
+        }
+
+        return new JsonModel($response);
+    }
     
 }
