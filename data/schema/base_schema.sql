@@ -1,6 +1,6 @@
-DROP DATABASE `publogger`;
+DROP DATABASE IF EXISTS `publogger`;
 
-CREATE DATABASE `publogger`;
+CREATE DATABASE IF NOT EXISTS `publogger`;
 
 USE `publogger`;
 
