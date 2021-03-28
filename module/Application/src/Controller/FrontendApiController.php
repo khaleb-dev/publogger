@@ -264,7 +264,7 @@ class FrontendApiController extends AbstractActionController
         return new JsonModel($response);
     }
 
-    public function groupBlogPostsAction() : JsonModel
+    public function blogPostsGroupAction() : JsonModel
     {
         $response = $this->response();
 
@@ -279,7 +279,7 @@ class FrontendApiController extends AbstractActionController
             if (empty($group)) {
                 $response = $this->response(404, 'NOT FOUND');
             }
-            // return all post that have not been deleted
+            // return all post under this group that have not been deleted
             $posts = $this->entityManager->getRepository(Post::class)->findBy(["group" => $group, "isDeleted" => false]);
             if (empty($posts)) {
                 $response = $this->response(204, 'NO CONTENT');
@@ -289,6 +289,44 @@ class FrontendApiController extends AbstractActionController
                 $postsArr = array();
                 foreach ($posts as $post) {
                     array_push($postsArr, $this->buildPostData($post));
+                }
+                // add post array to json response
+                $response['postData'] = $postsArr;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+    public function blogPostsTagAction() : JsonModel
+    {
+        $response = $this->response();
+
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ 
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            // find the tag
+            $tag = $this->entityManager->getRepository(Tags::class)->findBy(["id" => $id]);
+            if (empty($tag)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            // fetch all posts by this tag
+            $tagedPosts = $this->entityManager->getRepository(PostTags::class)->findBy(["tag" => $tag]);
+            if (empty($tagedPosts)) {
+                $response = $this->response(204, 'NO CONTENT');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $postsArr = array();
+                foreach ($tagedPosts as $tagedPost) {
+                    // do not return deleted posts
+                    if($tagedPost->getIsDeleted() == true) {
+                        continue;
+                    }
+                    array_push($postsArr, $this->buildPostData($tagedPost->getPost()));
                 }
                 // add post array to json response
                 $response['postData'] = $postsArr;
