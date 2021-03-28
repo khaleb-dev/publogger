@@ -50,6 +50,128 @@ class FrontendApiController extends AbstractActionController
         return $response;
     }
 
+    public function tagAction() : JsonModel
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ 
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            // search tag by id
+            $tag = $this->entityManager->getRepository(Tags::class)->find($id);
+            if (empty($tag)) {
+                $response = $this->response(204, 'NO CONTENT');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $tagData = [];
+                $tagData['id'] = $tag->getId();
+                $tagData['name'] = $tag->getName();
+                $tagData['description'] = $tag->getDescription();
+                $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                $response['tag'] = $tagData;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+    public function tagsAction() : JsonModel
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $tags = $this->entityManager->getRepository(Tags::class)->findAll();
+            if (empty($tags)) {
+                $response = $this->response(204, 'NO CONTENT');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $tagsData = array();
+                foreach ($tags as $tag) {
+                    $tagData = [];
+                    $tagData['id'] = $tag->getId();
+                    $tagData['name'] = $tag->getName();
+                    $tagData['description'] = $tag->getDescription();
+                    $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
+
+                    array_push($tagsData, $tagData);
+                }
+
+                $response['tags'] = $tagsData;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+    public function groupAction() : JsonModel
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ 
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            // search group by id
+            $group = $this->entityManager->getRepository(PostGroup::class)->find($id);
+            if (empty($group)) {
+                $response = $this->response(204, 'NO CONTENT');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $groupData = [];
+                $groupData['id'] = $group->getId();
+                $groupData['name'] = $group->getName();
+                $groupData['description'] = $group->getDescription();
+                $groupData['default'] = $group->getIsDefault();
+                $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
+
+                $response['group'] = $groupData;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
+    public function groupsAction() : JsonModel
+    {
+        $response = $this->response();
+        
+        if ($this->getRequest()->isGet())
+        {
+            $groups = $this->entityManager->getRepository(PostGroup::class)->findAll();
+            if (empty($groups)) {
+                $response = $this->response(204, 'NO CONTENT');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                $groupsArr = array();
+                foreach ($groups as $group) {
+                    $groupData = [];
+                    $groupData['id'] = $group->getId();
+                    $groupData['name'] = $group->getName();
+                    $groupData['description'] = $group->getDescription();
+                    $groupData['default'] = $group->getIsDefault();
+                    $groupData['created_at'] = $group->getCreatedAt()->format('Y-m-d H:i:s');
+
+                    array_push($groupsArr, $groupData);
+                }
+
+                $response['groups'] = $groupsArr;
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
     /**
      * build post data once
      */
@@ -90,104 +212,92 @@ class FrontendApiController extends AbstractActionController
         return $postData;
     }
 
+    public function blogPostAction() : JsonModel
+    {
+        $response = $this->response();
+
+        if ($this->getRequest()->isGet())
+        {
+            $id = intval($this->params()->fromRoute('id', null));
+            if(is_null($id) || $id <= 0){ 
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            // search post by id
+            $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => $id, "isDeleted" => false]);
+            if (empty($post)) {
+                $response = $this->response(204, 'NO CONTENT');
+            }
+            else {
+                $response = $this->response(200, 'OK');
+                // increment the number of views
+                $post = $this->frontendApiManager->incrementPostView($post);
+                // add post data to json response
+                $response['postData'] = $this->buildPostData($post);
+            }
+        }
+
+        return new JsonModel($response);
+    }
+
     public function blogPostsAction() : JsonModel
     {
         $response = $this->response();
 
         if ($this->getRequest()->isGet())
         {
-            $id = intval($this->params()->fromRoute('id', null));
-            if(is_null($id) || $id <= 0){ // return all post that have not been deleted
-                $posts = $this->entityManager->getRepository(Post::class)->findBy(["isDeleted" => false]);
-                if (empty($posts)) {
-                    $response = $this->response(404, 'NOT FOUND');
-                }
-                else {
-                    $response = $this->response(200, 'OK');
-                    $postsArr = array();
-                    foreach ($posts as $post) {
-                        array_push($postsArr, $this->buildPostData($post));
-                    }
-                    // add post array to json response
-                    $response['postData'] = $postsArr;
-                }
-            }
-            else { // search post by id
-                $post = $this->entityManager->getRepository(Post::class)->findOneBy(["id" => $id, "isDeleted" => false]);
-                if (empty($post)) {
-                    $response = $this->response(404, 'NOT FOUND');
-                }
-                else {
-                    $response = $this->response(200, 'OK');
-                    // increment the number of views
-                    $post = $this->frontendApiManager->incrementPostView($post);
-                    // add post data to json response
-                    $response['postData'] = $this->buildPostData($post);
-                }
-            }
-        }
-
-        return new JsonModel($response);
-    }
-
-    public function tagAction() : JsonModel
-    {
-        $response = $this->response();
-        
-        if ($this->getRequest()->isGet())
-        {
-            $id = intval($this->params()->fromRoute('id', null));
-            $tag = $this->entityManager->getRepository(Tags::class)->find($id);
-            if (empty($tag)) {
-                $response = $this->response(404, 'NOT FOUND');
+            // return all post that have not been deleted
+            $posts = $this->entityManager->getRepository(Post::class)->findBy(["isDeleted" => false]);
+            if (empty($posts)) {
+                $response = $this->response(204, 'NO CONTENT');
             }
             else {
                 $response = $this->response(200, 'OK');
-                $tagData = [];
-                $tagData['id'] = $tag->getId();
-                $tagData['name'] = $tag->getName();
-                $tagData['description'] = $tag->getDescription();
-                $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
-
-                $response['tag'] = $tagData;
+                $postsArr = array();
+                foreach ($posts as $post) {
+                    array_push($postsArr, $this->buildPostData($post));
+                }
+                // add post array to json response
+                $response['postData'] = $postsArr;
             }
         }
 
         return new JsonModel($response);
     }
 
-    /**
-     * Action to handle tags
-     */
-    public function tagsAction() : JsonModel
+    public function groupBlogPostsAction() : JsonModel
     {
         $response = $this->response();
-        
+
         if ($this->getRequest()->isGet())
         {
             $id = intval($this->params()->fromRoute('id', null));
-            $tags = $this->entityManager->getRepository(Tags::class)->findAll();
-            if (empty($tags)) {
+            if(is_null($id) || $id <= 0){ 
                 $response = $this->response(404, 'NOT FOUND');
+            }
+            // find the group
+            $group = $this->entityManager->getRepository(PostGroup::class)->findBy(["id" => $id]);
+            if (empty($group)) {
+                $response = $this->response(404, 'NOT FOUND');
+            }
+            // return all post that have not been deleted
+            $posts = $this->entityManager->getRepository(Post::class)->findBy(["group" => $group, "isDeleted" => false]);
+            if (empty($posts)) {
+                $response = $this->response(204, 'NO CONTENT');
             }
             else {
                 $response = $this->response(200, 'OK');
-                $tagsData = array();
-                foreach ($tags as $tag) {
-                    $tagData = [];
-                    $tagData['id'] = $tag->getId();
-                    $tagData['name'] = $tag->getName();
-                    $tagData['description'] = $tag->getDescription();
-                    $tagData['created_at'] = $tag->getCreatedAt()->format('Y-m-d H:i:s');
-
-                    array_push($tagsData, $tagData);
+                $postsArr = array();
+                foreach ($posts as $post) {
+                    array_push($postsArr, $this->buildPostData($post));
                 }
-
-                $response['tags'] = $tagsData;
+                // add post array to json response
+                $response['postData'] = $postsArr;
             }
         }
 
         return new JsonModel($response);
     }
+
+
     
 }
